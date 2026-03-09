@@ -6,8 +6,6 @@ A Pendo replacement Proof-of-Concept for Edio — providing in-app guides, stude
 
 ```
 GuideOps/
-├── docker-compose.yml          # SQL Server container (Docker/Podman)
-├── infra.sh                    # Infrastructure script (auto-detects runtime)
 ├── GuideOps.sln                # .NET solution
 └── src/
     ├── GuideOps.Api/           # ASP.NET Web API + HotChocolate GraphQL
@@ -20,7 +18,7 @@ GuideOps/
 
 | Layer | Technology |
 |-------|-----------|
-| Database | SQL Server (Docker / Podman) |
+| Database | SQL Server LocalDB |
 | Backend | .NET 10, ASP.NET Web API, HotChocolate GraphQL, EF Core |
 | Admin Frontend | React 19, Vite, TailwindCSS v4.2, urql, MSAL |
 | SDK | React, driver.js, graphql-request |
@@ -29,40 +27,12 @@ GuideOps/
 ## Getting Started
 
 ### Prerequisites
-- .NET 10 SDK
+- .NET 10 SDK (includes SQL Server LocalDB)
 - Node.js 22+
-- Docker **or** Podman (with `podman-compose` or the `compose` plugin)
 
-### 1. Start SQL Server
+### 1. Run the API
 
-The included `infra.sh` script auto-detects whether you have Docker or Podman:
-
-```bash
-./infra.sh up
-```
-
-Or use your runtime directly:
-
-```bash
-# Docker
-docker compose up -d
-
-# Podman
-podman-compose up -d
-# or
-podman compose up -d
-```
-
-Other `infra.sh` commands:
-
-```bash
-./infra.sh status   # Show running containers
-./infra.sh logs     # View logs
-./infra.sh down     # Stop services
-./infra.sh reset    # Stop and remove all data volumes
-```
-
-### 2. Run the API
+SQL Server LocalDB is included with Visual Studio and the .NET SDK on Windows. The database is created automatically on first run via `EnsureCreated()`.
 
 ```bash
 cd src/GuideOps.Api
