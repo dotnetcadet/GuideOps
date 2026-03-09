@@ -62,13 +62,14 @@ public partial class MutationType
 
         if (guide is null) return null;
 
-        // Remove existing steps
+        // Remove existing steps and clear the tracked collection
         context.GuideSteps.RemoveRange(guide.Steps);
+        await context.SaveChangesAsync();
 
-        // Add new steps
+        // Add new steps directly to the DbSet to avoid change tracker conflicts
         for (var i = 0; i < steps.Count; i++)
         {
-            guide.Steps.Add(new GuideStep
+            context.GuideSteps.Add(new GuideStep
             {
                 GuideId = guideId,
                 StepOrder = i + 1,
