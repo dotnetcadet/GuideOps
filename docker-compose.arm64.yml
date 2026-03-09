@@ -1,8 +1,7 @@
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/azure-sql-edge:latest
     container_name: guideops-sqlserver
-    platform: linux/amd64
     environment:
       SA_PASSWORD: "GuideOps@Dev2026!"
       ACCEPT_EULA: "Y"
