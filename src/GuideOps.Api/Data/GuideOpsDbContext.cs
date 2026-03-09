@@ -1,5 +1,6 @@
 using GuideOps.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 
 namespace GuideOps.Api.Data;
 
@@ -24,6 +25,13 @@ public class GuideOpsDbContext(DbContextOptions<GuideOpsDbContext> options) : Db
             entity.Property(e => e.DisplayName).HasMaxLength(256);
             entity.Property(e => e.Email).HasMaxLength(256);
             entity.Property(e => e.Role).HasMaxLength(50);
+
+            
+
+            entity.HasData(
+                // Teachers
+                
+            );
         });
 
         // Guide
@@ -121,28 +129,6 @@ public class GuideOpsDbContext(DbContextOptions<GuideOpsDbContext> options) : Db
         });
 
         // Seed test users
-        var now = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        modelBuilder.Entity<User>().HasData(
-            // Teachers
-            new User { Id = 1, AzureAdObjectId = "00000000-0000-0000-0000-000000000001", DisplayName = "Sarah Johnson", Email = "sjohnson@edio.school", Role = "Teacher", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 2, AzureAdObjectId = "00000000-0000-0000-0000-000000000002", DisplayName = "Michael Chen", Email = "mchen@edio.school", Role = "Teacher", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 3, AzureAdObjectId = "00000000-0000-0000-0000-000000000003", DisplayName = "Rachel Williams", Email = "rwilliams@edio.school", Role = "Teacher", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 4, AzureAdObjectId = "00000000-0000-0000-0000-000000000004", DisplayName = "David Martinez", Email = "dmartinez@edio.school", Role = "Teacher", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 5, AzureAdObjectId = "00000000-0000-0000-0000-000000000005", DisplayName = "Lisa Thompson", Email = "lthompson@edio.school", Role = "Teacher", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            // Students
-            new User { Id = 6, AzureAdObjectId = "00000000-0000-0000-0000-000000000006", DisplayName = "Emma Davis", Email = "edavis@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 7, AzureAdObjectId = "00000000-0000-0000-0000-000000000007", DisplayName = "James Wilson", Email = "jwilson@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 8, AzureAdObjectId = "00000000-0000-0000-0000-000000000008", DisplayName = "Sophia Garcia", Email = "sgarcia@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 9, AzureAdObjectId = "00000000-0000-0000-0000-000000000009", DisplayName = "Ethan Brown", Email = "ebrown@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 10, AzureAdObjectId = "00000000-0000-0000-0000-000000000010", DisplayName = "Olivia Anderson", Email = "oanderson@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 11, AzureAdObjectId = "00000000-0000-0000-0000-000000000011", DisplayName = "Noah Taylor", Email = "ntaylor@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 12, AzureAdObjectId = "00000000-0000-0000-0000-000000000012", DisplayName = "Ava Thomas", Email = "athomas@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 13, AzureAdObjectId = "00000000-0000-0000-0000-000000000013", DisplayName = "Liam Jackson", Email = "ljackson@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 14, AzureAdObjectId = "00000000-0000-0000-0000-000000000014", DisplayName = "Isabella White", Email = "iwhite@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            new User { Id = 15, AzureAdObjectId = "00000000-0000-0000-0000-000000000015", DisplayName = "Mason Harris", Email = "mharris@edio.school", Role = "Student", IsActive = true, CreatedAt = now, UpdatedAt = now },
-            // Admin
-            new User { Id = 16, AzureAdObjectId = "00000000-0000-0000-0000-000000000016", DisplayName = "Admin User", Email = "admin@edio.school", Role = "Admin", IsActive = true, CreatedAt = now, UpdatedAt = now }
-        );
+       
     }
 }
