@@ -1,18 +1,28 @@
 import { gql } from '@apollo/client/core';
 
 export const GET_USERS = gql`
-  query GetUsers {
-    users {
-      nodes {
-        id
-        azureAdObjectId
-        displayName
-        email
-        role
-        isActive
-        lastSyncedAt
-        createdAt
+  query GetUsers($first: Int, $after: String, $last: Int, $before: String) {
+    users(first: $first, after: $after, last: $last, before: $before) {
+      edges {
+        cursor
+        node {
+          id
+          azureAdObjectId
+          displayName
+          email
+          role
+          isActive
+          lastSyncedAt
+          createdAt
+        }
       }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
     }
   }
 `;
@@ -49,21 +59,31 @@ export const GET_USER_BY_ID = gql`
 `;
 
 export const GET_GUIDES = gql`
-  query GetGuides {
-    guides {
-      nodes {
-        id
-        title
-        description
-        type
-        isActive
-        schoolYear
-        priority
-        createdAt
-        steps {
+  query GetGuides($first: Int, $after: String, $last: Int, $before: String) {
+    guides(first: $first, after: $after, last: $last, before: $before) {
+      edges {
+        cursor
+        node {
           id
+          title
+          description
+          type
+          isActive
+          schoolYear
+          priority
+          createdAt
+          steps {
+            id
+          }
         }
       }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
     }
   }
 `;
@@ -99,17 +119,27 @@ export const GET_GUIDE_BY_ID = gql`
 `;
 
 export const GET_HANDBOOKS = gql`
-  query GetHandbooks {
-    handbooks {
-      nodes {
-        id
-        title
-        contentUrl
-        schoolYear
-        isActive
-        requiresAcknowledgment
-        createdAt
+  query GetHandbooks($first: Int, $after: String, $last: Int, $before: String) {
+    handbooks(first: $first, after: $after, last: $last, before: $before) {
+      edges {
+        cursor
+        node {
+          id
+          title
+          contentUrl
+          schoolYear
+          isActive
+          requiresAcknowledgment
+          createdAt
+        }
       }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
     }
   }
 `;
@@ -135,24 +165,34 @@ export const GET_HANDBOOK_BY_ID = gql`
 `;
 
 export const GET_ACKNOWLEDGMENTS = gql`
-  query GetAcknowledgments {
-    acknowledgments {
-      nodes {
-        id
-        userId
-        handbookId
-        schoolYear
-        acknowledgedAt
-        ipAddress
-        user {
-          displayName
-          email
-          role
-        }
-        handbook {
-          title
+  query GetAcknowledgments($first: Int, $after: String, $last: Int, $before: String) {
+    acknowledgments(first: $first, after: $after, last: $last, before: $before) {
+      edges {
+        cursor
+        node {
+          id
+          userId
+          handbookId
+          schoolYear
+          acknowledgedAt
+          ipAddress
+          user {
+            displayName
+            email
+            role
+          }
+          handbook {
+            title
+          }
         }
       }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
     }
   }
 `;

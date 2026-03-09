@@ -1,22 +1,27 @@
 import { useQuery } from '@apollo/client/react';
 import { GET_USERS, GET_GUIDES, GET_HANDBOOKS, GET_ACKNOWLEDGMENTS } from '../graphql/queries';
 
+function nodesFromConnection(connection: any): any[] {
+  return connection?.edges?.map((e: any) => e.node) ?? [];
+}
+
 export function Dashboard() {
   const { data: usersData }: any = useQuery(GET_USERS);
   const { data: guidesData }: any = useQuery(GET_GUIDES);
   const { data: handbooksData }: any = useQuery(GET_HANDBOOKS);
   const { data: ackData }: any = useQuery(GET_ACKNOWLEDGMENTS);
 
-  const users = usersData?.users?.nodes ?? [];
-  const guides = guidesData?.guides?.nodes ?? [];
-  const handbooks = handbooksData?.handbooks?.nodes ?? [];
-  const acknowledgments = ackData?.acknowledgments?.nodes ?? [];
+  const userCount = usersData?.users?.totalCount ?? 0;
+  const users = nodesFromConnection(usersData?.users);
+  const guides = nodesFromConnection(guidesData?.guides);
+  const handbooks = nodesFromConnection(handbooksData?.handbooks);
+  const acknowledgments = nodesFromConnection(ackData?.acknowledgments);
 
   const stats = [
-    { label: 'Total Users', value: users.length, color: 'bg-blue-500' },
+    { label: 'Total Users', value: userCount, color: 'bg-blue-500' },
     { label: 'Active Guides', value: guides.filter((g: { isActive: boolean }) => g.isActive).length, color: 'bg-green-500' },
     { label: 'Active Handbooks', value: handbooks.filter((h: { isActive: boolean }) => h.isActive).length, color: 'bg-purple-500' },
-    { label: 'Acknowledgments', value: acknowledgments.length, color: 'bg-amber-500' },
+    { label: 'Acknowledgments', value: ackData?.acknowledgments?.totalCount ?? 0, color: 'bg-amber-500' },
   ];
 
   const roleBreakdown = ['Student', 'Teacher', 'Admin'].map(role => ({
@@ -57,7 +62,7 @@ export function Dashboard() {
                   <div className="w-32 bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-indigo-600 h-2 rounded-full"
-                      style={{ width: `${users.length > 0 ? (count / users.length) * 100 : 0}%` }}
+                      style={{ width: `${userCount > 0 ? (count / userCount) * 100 : 0}%` }}
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-900 w-8 text-right">{count}</span>

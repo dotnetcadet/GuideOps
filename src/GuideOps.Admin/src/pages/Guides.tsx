@@ -13,7 +13,7 @@ export function Guides() {
   const { data, loading, refetch }: any = useQuery(GET_GUIDES);
   const [deleteGuide] = useMutation(DELETE_GUIDE);
 
-  const guides = data?.guides?.nodes ?? [];
+  const guides = data?.guides?.edges?.map((e: any) => e.node) ?? [];
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this guide?')) return;

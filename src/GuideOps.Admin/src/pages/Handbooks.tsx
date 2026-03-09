@@ -13,7 +13,7 @@ export function Handbooks() {
   const { data, loading, refetch }: any = useQuery(GET_HANDBOOKS);
   const [deleteHandbook] = useMutation(DELETE_HANDBOOK);
 
-  const handbooks = data?.handbooks?.nodes ?? [];
+  const handbooks = data?.handbooks?.edges?.map((e: any) => e.node) ?? [];
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this handbook?')) return;

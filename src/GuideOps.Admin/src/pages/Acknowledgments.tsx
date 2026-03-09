@@ -33,13 +33,13 @@ export function Acknowledgments() {
     skip: !selectedHandbookId,
   });
 
-  const acknowledgments = (ackData?.acknowledgments?.nodes ?? []).filter((a: Acknowledgment) => {
+  const acknowledgments = (ackData?.acknowledgments?.edges?.map((e: any) => e.node) ?? []).filter((a: Acknowledgment) => {
     if (schoolYear && a.schoolYear !== schoolYear) return false;
     if (selectedHandbookId && a.handbookId !== selectedHandbookId) return false;
     return true;
   });
 
-  const handbooks = handbooksData?.handbooks?.nodes ?? [];
+  const handbooks = handbooksData?.handbooks?.edges?.map((e: any) => e.node) ?? [];
   const stats = statsData?.acknowledgmentStats;
 
   return (

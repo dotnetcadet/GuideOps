@@ -37,7 +37,7 @@ export function Users() {
   const { data, loading, refetch }: any = useQuery(GET_USERS);
   const [syncUsers, { data: syncData, loading: syncing }]: any = useMutation(SYNC_USERS);
 
-  const users = data?.users?.nodes ?? [];
+  const users = data?.users?.edges?.map((e: any) => e.node) ?? [];
 
   const handleSync = async () => {
     await syncUsers();
