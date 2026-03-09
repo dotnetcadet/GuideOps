@@ -7,13 +7,13 @@ namespace GuideOps.Api.GraphQL.Mutations;
 public partial class MutationType
 {
     public async Task<SyncResult> SyncUsersFromAzureAd(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         [Service] IAzureAdSyncService syncService)
     {
         return await syncService.SyncUsersAsync(context);
     }
 
-    public async Task<User> CreateUser(GuideOpsDbContext context, CreateUserInput input)
+    public async Task<User> CreateUser([Service] GuideOpsDbContext context, CreateUserInput input)
     {
         var user = new User
         {
@@ -30,7 +30,7 @@ public partial class MutationType
         return user;
     }
 
-    public async Task<User?> UpdateUserRole(GuideOpsDbContext context, int id, string role)
+    public async Task<User?> UpdateUserRole([Service] GuideOpsDbContext context, int id, string role)
     {
         var user = await context.Users.FindAsync(id);
         if (user is null) return null;

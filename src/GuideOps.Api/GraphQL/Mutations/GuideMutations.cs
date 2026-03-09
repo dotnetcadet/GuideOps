@@ -6,7 +6,7 @@ namespace GuideOps.Api.GraphQL.Mutations;
 
 public partial class MutationType
 {
-    public async Task<Guide> CreateGuide(GuideOpsDbContext context, CreateGuideInput input)
+    public async Task<Guide> CreateGuide([Service] GuideOpsDbContext context, CreateGuideInput input)
     {
         var guide = new Guide
         {
@@ -24,7 +24,7 @@ public partial class MutationType
         return guide;
     }
 
-    public async Task<Guide?> UpdateGuide(GuideOpsDbContext context, int id, UpdateGuideInput input)
+    public async Task<Guide?> UpdateGuide([Service] GuideOpsDbContext context, int id, UpdateGuideInput input)
     {
         var guide = await context.Guides.FindAsync(id);
         if (guide is null) return null;
@@ -41,7 +41,7 @@ public partial class MutationType
         return guide;
     }
 
-    public async Task<bool> DeleteGuide(GuideOpsDbContext context, int id)
+    public async Task<bool> DeleteGuide([Service] GuideOpsDbContext context, int id)
     {
         var guide = await context.Guides.FindAsync(id);
         if (guide is null) return false;
@@ -52,7 +52,7 @@ public partial class MutationType
     }
 
     public async Task<Guide?> SetGuideSteps(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         int guideId,
         List<GuideStepInput> steps)
     {

@@ -10,13 +10,13 @@ public partial class QueryType
     [UsePaging]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<Acknowledgment> GetAcknowledgments(GuideOpsDbContext context)
+    public IQueryable<Acknowledgment> GetAcknowledgments([Service] GuideOpsDbContext context)
         => context.Acknowledgments
             .Include(a => a.User)
             .Include(a => a.Handbook);
 
     public async Task<AcknowledgmentStats> GetAcknowledgmentStats(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         string schoolYear,
         int handbookId)
     {
@@ -44,7 +44,7 @@ public partial class QueryType
     }
 
     public async Task<bool> HasUserAcknowledged(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         string azureAdObjectId,
         int handbookId,
         string schoolYear)

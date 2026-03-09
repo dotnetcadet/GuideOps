@@ -10,10 +10,10 @@ public partial class QueryType
     [UsePaging]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<Guide> GetGuides(GuideOpsDbContext context)
+    public IQueryable<Guide> GetGuides([Service] GuideOpsDbContext context)
         => context.Guides.Include(g => g.Steps.OrderBy(s => s.StepOrder));
 
-    public async Task<Guide?> GetGuideById(GuideOpsDbContext context, int id)
+    public async Task<Guide?> GetGuideById([Service] GuideOpsDbContext context, int id)
         => await context.Guides
             .Include(g => g.Steps.OrderBy(s => s.StepOrder))
             .Include(g => g.Assignments)

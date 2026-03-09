@@ -7,7 +7,7 @@ namespace GuideOps.Api.GraphQL.Mutations;
 public partial class MutationType
 {
     public async Task<Acknowledgment?> RecordAcknowledgment(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         RecordAcknowledgmentInput input)
     {
         var user = await context.Users
@@ -44,7 +44,7 @@ public partial class MutationType
     }
 
     public async Task<GuideCompletion?> RecordGuideCompletion(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         string azureAdObjectId,
         int guideId)
     {

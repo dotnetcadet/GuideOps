@@ -8,6 +8,6 @@ public partial class QueryType
     [UsePaging]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<Assignment> GetAssignments(GuideOpsDbContext context)
+    public IQueryable<Assignment> GetAssignments([Service] GuideOpsDbContext context)
     => context.Assignments;
 }

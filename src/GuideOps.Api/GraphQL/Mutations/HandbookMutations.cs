@@ -5,7 +5,7 @@ namespace GuideOps.Api.GraphQL.Mutations;
 
 public partial class MutationType
 {
-    public async Task<Handbook> CreateHandbook(GuideOpsDbContext context, CreateHandbookInput input)
+    public async Task<Handbook> CreateHandbook([Service] GuideOpsDbContext context, CreateHandbookInput input)
     {
         var handbook = new Handbook
         {
@@ -22,7 +22,7 @@ public partial class MutationType
         return handbook;
     }
 
-    public async Task<Handbook?> UpdateHandbook(GuideOpsDbContext context, int id, UpdateHandbookInput input)
+    public async Task<Handbook?> UpdateHandbook([Service] GuideOpsDbContext context, int id, UpdateHandbookInput input)
     {
         var handbook = await context.Handbooks.FindAsync(id);
         if (handbook is null) return null;
@@ -39,7 +39,7 @@ public partial class MutationType
         return handbook;
     }
 
-    public async Task<bool> DeleteHandbook(GuideOpsDbContext context, int id)
+    public async Task<bool> DeleteHandbook([Service] GuideOpsDbContext context, int id)
     {
         var handbook = await context.Handbooks.FindAsync(id);
         if (handbook is null) return false;

@@ -6,7 +6,7 @@ namespace GuideOps.Api.GraphQL.Mutations;
 public partial class MutationType
 {
     public async Task<Assignment> CreateAssignment(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         CreateAssignmentInput input)
     {
         var assignment = new Assignment
@@ -23,7 +23,7 @@ public partial class MutationType
         return assignment;
     }
 
-    public async Task<bool> DeleteAssignment(GuideOpsDbContext context, int id)
+    public async Task<bool> DeleteAssignment([Service] GuideOpsDbContext context, int id)
     {
         var assignment = await context.Assignments.FindAsync(id);
         if (assignment is null) return false;

@@ -1,11 +1,7 @@
 import { useMemo } from 'react';
 import { useMsal } from '@azure/msal-react';
-import {
-  ApolloClient,
-  InMemoryCache,
-  createHttpLink,
-} from '@apollo/client/core';
-import { setContext } from '@apollo/client/link/context';
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+import { SetContextLink } from "@apollo/client/link/context";
 import { graphqlScopes } from '../auth/msalConfig';
 
 const API_URL = import.meta.env.VITE_API_URL || '/graphql';
@@ -15,9 +11,13 @@ export function useApolloClient() {
   const account = accounts[0] ?? null;
 
   return useMemo(() => {
-    const httpLink = createHttpLink({ uri: API_URL });
 
-    const authLink = setContext(async (_, { headers }) => {
+    const httpLink = new HttpLink({ 
+      uri: API_URL,
+
+    })
+
+    const authLink = new SetContextLink(async ({ headers }) => {
       if (!account) return { headers };
 
       try {
