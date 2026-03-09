@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { StepEditor } from '../components/StepEditor';
 import { SchoolYearPicker } from '../components/SchoolYearPicker';
 import { GET_GUIDE_BY_ID } from '../graphql/queries';
@@ -12,12 +12,15 @@ export function GuideEditor() {
   const navigate = useNavigate();
   const isNew = !id || id === 'new';
 
-  const [guideResult] = useQuery({ query: GET_GUIDE_BY_ID, variables: { id: Number(id) }, pause: isNew });
-  const [, createGuide] = useMutation(CREATE_GUIDE);
-  const [, updateGuide] = useMutation(UPDATE_GUIDE);
-  const [, setGuideSteps] = useMutation(SET_GUIDE_STEPS);
-  const [, createAssignment] = useMutation(CREATE_ASSIGNMENT);
-  const [, deleteAssignment] = useMutation(DELETE_ASSIGNMENT);
+  const { data: guideData, loading: guideLoading }: any = useQuery(GET_GUIDE_BY_ID, {
+    variables: { id: Number(id) },
+    skip: isNew,
+  });
+  const [createGuide] = useMutation(CREATE_GUIDE);
+  const [updateGuide] = useMutation(UPDATE_GUIDE);
+  const [setGuideSteps] = useMutation(SET_GUIDE_STEPS);
+  const [createAssignment] = useMutation(CREATE_ASSIGNMENT);
+  const [deleteAssignment] = useMutation(DELETE_ASSIGNMENT);
 
   const [form, setForm] = useState({
     title: '',
@@ -33,8 +36,8 @@ export function GuideEditor() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (guideResult.data?.guideById) {
-      const g = guideResult.data.guideById;
+    if (guideData?.guideById) {
+      const g = guideData.guideById;
       setForm({
         title: g.title,
         description: g.description,
@@ -55,7 +58,7 @@ export function GuideEditor() {
         setAssignToRole(g.assignments[0].assignToRole);
       }
     }
-  }, [guideResult.data]);
+  }, [guideData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,41 +68,43 @@ export function GuideEditor() {
       let guideId: number;
 
       if (isNew) {
-        const result = await createGuide({ input: { ...form, createdBy: 'admin' } });
-        if (result.error) throw result.error;
-        guideId = result.data.createGuide.id;
+        const { data } = await createGuide({ variables: { input: { ...form, createdBy: 'admin' } } }) as any;
+        guideId = data.createGuide.id;
       } else {
         guideId = Number(id);
-        const result = await updateGuide({ id: guideId, input: form });
-        if (result.error) throw result.error;
+        await updateGuide({ variables: { id: guideId, input: form } });
       }
 
       // Save steps
       if (steps.length > 0) {
         await setGuideSteps({
-          guideId,
-          steps: steps.map((s) => ({
-            elementSelector: s.elementSelector,
-            title: s.title,
-            description: s.description,
-            side: s.side,
-            pageUrl: s.pageUrl,
-          })),
+          variables: {
+            guideId,
+            steps: steps.map((s) => ({
+              elementSelector: s.elementSelector,
+              title: s.title,
+              description: s.description,
+              side: s.side,
+              pageUrl: s.pageUrl,
+            })),
+          },
         });
       }
 
       // Handle assignment
-      if (!isNew && guideResult.data?.guideById?.assignments?.length > 0) {
-        for (const a of guideResult.data.guideById.assignments) {
-          await deleteAssignment({ id: a.id });
+      if (!isNew && guideData?.guideById?.assignments?.length > 0) {
+        for (const a of guideData.guideById.assignments) {
+          await deleteAssignment({ variables: { id: a.id } });
         }
       }
       await createAssignment({
-        input: {
-          targetType: 'Guide',
-          targetId: guideId,
-          assignToRole,
-          schoolYear: form.schoolYear,
+        variables: {
+          input: {
+            targetType: 'Guide',
+            targetId: guideId,
+            assignToRole,
+            schoolYear: form.schoolYear,
+          },
         },
       });
 
@@ -109,7 +114,7 @@ export function GuideEditor() {
     }
   };
 
-  if (!isNew && guideResult.fetching) {
+  if (!isNew && guideLoading) {
     return <div className="text-center py-12 text-gray-500">Loading...</div>;
   }
 

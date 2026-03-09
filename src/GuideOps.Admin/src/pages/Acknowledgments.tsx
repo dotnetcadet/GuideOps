@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from 'urql';
+import { useQuery } from '@apollo/client/react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { DataTable } from '../components/DataTable';
 import { SchoolYearPicker } from '../components/SchoolYearPicker';
@@ -26,22 +26,21 @@ export function Acknowledgments() {
   const [schoolYear, setSchoolYear] = useState(`${currentYear}-${currentYear + 1}`);
   const [selectedHandbookId, setSelectedHandbookId] = useState<number | null>(null);
 
-  const [ackResult] = useQuery({ query: GET_ACKNOWLEDGMENTS });
-  const [handbooksResult] = useQuery({ query: GET_HANDBOOKS });
-  const [statsResult] = useQuery({
-    query: GET_ACKNOWLEDGMENT_STATS,
+  const { data: ackData, loading: ackLoading }: any = useQuery(GET_ACKNOWLEDGMENTS);
+  const { data: handbooksData }: any = useQuery(GET_HANDBOOKS);
+  const { data: statsData }: any = useQuery(GET_ACKNOWLEDGMENT_STATS, {
     variables: { schoolYear, handbookId: selectedHandbookId! },
-    pause: !selectedHandbookId,
+    skip: !selectedHandbookId,
   });
 
-  const acknowledgments = (ackResult.data?.acknowledgments?.nodes ?? []).filter((a: Acknowledgment) => {
+  const acknowledgments = (ackData?.acknowledgments?.nodes ?? []).filter((a: Acknowledgment) => {
     if (schoolYear && a.schoolYear !== schoolYear) return false;
     if (selectedHandbookId && a.handbookId !== selectedHandbookId) return false;
     return true;
   });
 
-  const handbooks = handbooksResult.data?.handbooks?.nodes ?? [];
-  const stats = statsResult.data?.acknowledgmentStats;
+  const handbooks = handbooksData?.handbooks?.nodes ?? [];
+  const stats = statsData?.acknowledgmentStats;
 
   return (
     <div>
@@ -96,7 +95,7 @@ export function Acknowledgments() {
       )}
 
       {/* Table */}
-      {ackResult.fetching ? (
+      {ackLoading ? (
         <div className="text-center py-12 text-gray-500">Loading acknowledgments...</div>
       ) : (
         <DataTable data={acknowledgments} columns={columns} searchPlaceholder="Search acknowledgments..." />

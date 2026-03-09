@@ -1,60 +1,47 @@
 import { useMemo } from 'react';
 import { useMsal } from '@azure/msal-react';
-import { createClient, cacheExchange, fetchExchange, type Client } from 'urql';
-import { authExchange } from '@urql/exchange-auth';
-import type { IPublicClientApplication, AccountInfo } from '@azure/msal-browser';
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+} from '@apollo/client/core';
+import { setContext } from '@apollo/client/link/context';
 import { graphqlScopes } from '../auth/msalConfig';
 
 const API_URL = import.meta.env.VITE_API_URL || '/graphql';
 
-function createMsalAuthExchange(msalInstance: IPublicClientApplication, account: AccountInfo | null) {
-  return authExchange(async (utils) => {
-    return {
-      addAuthToOperation(operation) {
-        if (!account) return operation;
-        // Token is fetched in getAuth and stored; willAuthError triggers refresh
-        const token = sessionStorage.getItem('guideops_access_token');
-        if (!token) return operation;
-        return utils.appendHeaders(operation, {
-          Authorization: `Bearer ${token}`,
-        });
-      },
-      didAuthError(error) {
-        return error.response?.status === 401;
-      },
-      willAuthError() {
-        // Check if we have a cached token
-        return !sessionStorage.getItem('guideops_access_token');
-      },
-      async refreshAuth() {
-        if (!account) return;
-        try {
-          const response = await msalInstance.acquireTokenSilent({
-            ...graphqlScopes,
-            account,
-          });
-          sessionStorage.setItem('guideops_access_token', response.accessToken);
-        } catch {
-          // Silent acquisition failed — trigger interactive login
-          await msalInstance.acquireTokenRedirect(graphqlScopes);
-        }
-      },
-    };
-  });
-}
-
-export function useUrqlClient(): Client {
+export function useApolloClient() {
   const { instance, accounts } = useMsal();
   const account = accounts[0] ?? null;
 
   return useMemo(() => {
-    return createClient({
-      url: API_URL,
-      exchanges: [
-        cacheExchange,
-        createMsalAuthExchange(instance, account),
-        fetchExchange,
-      ],
+    const httpLink = createHttpLink({ uri: API_URL });
+
+    const authLink = setContext(async (_, { headers }) => {
+      if (!account) return { headers };
+
+      try {
+        const response = await instance.acquireTokenSilent({
+          ...graphqlScopes,
+          account,
+        });
+        return {
+          headers: {
+            ...headers,
+            authorization: `Bearer ${response.accessToken}`,
+          },
+        };
+      } catch {
+        return { headers };
+      }
+    });
+
+    return new ApolloClient({
+      link: authLink.concat(httpLink),
+      cache: new InMemoryCache(),
+      defaultOptions: {
+        watchQuery: { fetchPolicy: 'cache-and-network' },
+      },
     });
   }, [instance, account]);
 }

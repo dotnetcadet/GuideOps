@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from 'urql';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
@@ -34,14 +34,14 @@ const columns = [
 ];
 
 export function Users() {
-  const [result, reexecute] = useQuery({ query: GET_USERS });
-  const [syncResult, syncUsers] = useMutation(SYNC_USERS);
+  const { data, loading, refetch }: any = useQuery(GET_USERS);
+  const [syncUsers, { data: syncData, loading: syncing }]: any = useMutation(SYNC_USERS);
 
-  const users = result.data?.users?.nodes ?? [];
+  const users = data?.users?.nodes ?? [];
 
   const handleSync = async () => {
-    await syncUsers({});
-    reexecute({ requestPolicy: 'network-only' });
+    await syncUsers();
+    refetch();
   };
 
   return (
@@ -55,22 +55,22 @@ export function Users() {
         </div>
         <button
           onClick={handleSync}
-          disabled={syncResult.fetching}
+          disabled={syncing}
           className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
         >
-          {syncResult.fetching ? 'Syncing...' : 'Sync from Azure AD'}
+          {syncing ? 'Syncing...' : 'Sync from Azure AD'}
         </button>
       </div>
 
-      {syncResult.data && (
+      {syncData && (
         <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
-          Sync complete: {syncResult.data.syncUsersFromAzureAd.created} created,{' '}
-          {syncResult.data.syncUsersFromAzureAd.updated} updated,{' '}
-          {syncResult.data.syncUsersFromAzureAd.deactivated} deactivated
+          Sync complete: {syncData.syncUsersFromAzureAd.created} created,{' '}
+          {syncData.syncUsersFromAzureAd.updated} updated,{' '}
+          {syncData.syncUsersFromAzureAd.deactivated} deactivated
         </div>
       )}
 
-      {result.fetching ? (
+      {loading ? (
         <div className="text-center py-12 text-gray-500">Loading users...</div>
       ) : (
         <DataTable data={users} columns={columns} searchPlaceholder="Search users..." />

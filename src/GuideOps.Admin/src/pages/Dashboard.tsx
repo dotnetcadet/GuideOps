@@ -1,16 +1,16 @@
-import { useQuery } from 'urql';
+import { useQuery } from '@apollo/client/react';
 import { GET_USERS, GET_GUIDES, GET_HANDBOOKS, GET_ACKNOWLEDGMENTS } from '../graphql/queries';
 
 export function Dashboard() {
-  const [usersResult] = useQuery({ query: GET_USERS });
-  const [guidesResult] = useQuery({ query: GET_GUIDES });
-  const [handbooksResult] = useQuery({ query: GET_HANDBOOKS });
-  const [ackResult] = useQuery({ query: GET_ACKNOWLEDGMENTS });
+  const { data: usersData }: any = useQuery(GET_USERS);
+  const { data: guidesData }: any = useQuery(GET_GUIDES);
+  const { data: handbooksData }: any = useQuery(GET_HANDBOOKS);
+  const { data: ackData }: any = useQuery(GET_ACKNOWLEDGMENTS);
 
-  const users = usersResult.data?.users?.nodes ?? [];
-  const guides = guidesResult.data?.guides?.nodes ?? [];
-  const handbooks = handbooksResult.data?.handbooks?.nodes ?? [];
-  const acknowledgments = ackResult.data?.acknowledgments?.nodes ?? [];
+  const users = usersData?.users?.nodes ?? [];
+  const guides = guidesData?.guides?.nodes ?? [];
+  const handbooks = handbooksData?.handbooks?.nodes ?? [];
+  const acknowledgments = ackData?.acknowledgments?.nodes ?? [];
 
   const stats = [
     { label: 'Total Users', value: users.length, color: 'bg-blue-500' },

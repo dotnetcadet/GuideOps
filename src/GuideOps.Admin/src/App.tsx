@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Provider as UrqlProvider } from 'urql';
-import { useUrqlClient } from './graphql/client';
+import { ApolloProvider } from '@apollo/client/react';
+import { useApolloClient } from './graphql/client';
 import { AuthGuard } from './auth/AuthGuard';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -12,11 +12,11 @@ import { HandbookEditor } from './pages/HandbookEditor';
 import { Acknowledgments } from './pages/Acknowledgments';
 
 export default function App() {
-  const urqlClient = useUrqlClient();
+  const client = useApolloClient();
 
   return (
     <AuthGuard>
-      <UrqlProvider value={urqlClient}>
+      <ApolloProvider client={client}>
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
@@ -32,7 +32,7 @@ export default function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-      </UrqlProvider>
+      </ApolloProvider>
     </AuthGuard>
   );
 }

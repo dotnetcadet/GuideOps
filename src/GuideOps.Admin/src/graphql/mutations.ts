@@ -1,4 +1,4 @@
-import { gql } from 'urql';
+import { gql } from '@apollo/client/core';
 
 export const SYNC_USERS = gql`
   mutation SyncUsersFromAzureAd {

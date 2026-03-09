@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from 'urql';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { SchoolYearPicker } from '../components/SchoolYearPicker';
 import { GET_HANDBOOK_BY_ID } from '../graphql/queries';
 import { CREATE_HANDBOOK, UPDATE_HANDBOOK, CREATE_ASSIGNMENT, DELETE_ASSIGNMENT } from '../graphql/mutations';
@@ -10,11 +10,14 @@ export function HandbookEditor() {
   const navigate = useNavigate();
   const isNew = !id || id === 'new';
 
-  const [result] = useQuery({ query: GET_HANDBOOK_BY_ID, variables: { id: Number(id) }, pause: isNew });
-  const [, createHandbook] = useMutation(CREATE_HANDBOOK);
-  const [, updateHandbook] = useMutation(UPDATE_HANDBOOK);
-  const [, createAssignment] = useMutation(CREATE_ASSIGNMENT);
-  const [, deleteAssignment] = useMutation(DELETE_ASSIGNMENT);
+  const { data: handbookData, loading: handbookLoading }: any = useQuery(GET_HANDBOOK_BY_ID, {
+    variables: { id: Number(id) },
+    skip: isNew,
+  });
+  const [createHandbook] = useMutation(CREATE_HANDBOOK);
+  const [updateHandbook] = useMutation(UPDATE_HANDBOOK);
+  const [createAssignment] = useMutation(CREATE_ASSIGNMENT);
+  const [deleteAssignment] = useMutation(DELETE_ASSIGNMENT);
 
   const [form, setForm] = useState({
     title: '',
@@ -29,8 +32,8 @@ export function HandbookEditor() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (result.data?.handbookById) {
-      const h = result.data.handbookById;
+    if (handbookData?.handbookById) {
+      const h = handbookData.handbookById;
       setForm({
         title: h.title,
         contentUrl: h.contentUrl || '',
@@ -43,7 +46,7 @@ export function HandbookEditor() {
         setAssignToRole(h.assignments[0].assignToRole);
       }
     }
-  }, [result.data]);
+  }, [handbookData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,27 +65,27 @@ export function HandbookEditor() {
       let handbookId: number;
 
       if (isNew) {
-        const res = await createHandbook({ input });
-        if (res.error) throw res.error;
-        handbookId = res.data.createHandbook.id;
+        const { data } = await createHandbook({ variables: { input } }) as any;
+        handbookId = data.createHandbook.id;
       } else {
         handbookId = Number(id);
-        const res = await updateHandbook({ id: handbookId, input });
-        if (res.error) throw res.error;
+        await updateHandbook({ variables: { id: handbookId, input } });
       }
 
       // Handle assignment
-      if (!isNew && result.data?.handbookById?.assignments?.length > 0) {
-        for (const a of result.data.handbookById.assignments) {
-          await deleteAssignment({ id: a.id });
+      if (!isNew && handbookData?.handbookById?.assignments?.length > 0) {
+        for (const a of handbookData.handbookById.assignments) {
+          await deleteAssignment({ variables: { id: a.id } });
         }
       }
       await createAssignment({
-        input: {
-          targetType: 'Handbook',
-          targetId: handbookId,
-          assignToRole,
-          schoolYear: form.schoolYear,
+        variables: {
+          input: {
+            targetType: 'Handbook',
+            targetId: handbookId,
+            assignToRole,
+            schoolYear: form.schoolYear,
+          },
         },
       });
 
@@ -92,7 +95,7 @@ export function HandbookEditor() {
     }
   };
 
-  if (!isNew && result.fetching) {
+  if (!isNew && handbookLoading) {
     return <div className="text-center py-12 text-gray-500">Loading...</div>;
   }
 

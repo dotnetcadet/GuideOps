@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 interface DataTableProps<T> {
   data: T[];
-  columns: ColumnDef<T, unknown>[];
+  columns: ColumnDef<T, any>[];
   searchPlaceholder?: string;
 }
 

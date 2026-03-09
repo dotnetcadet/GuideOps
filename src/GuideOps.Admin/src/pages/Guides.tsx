@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from 'urql';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
 import { DataTable } from '../components/DataTable';
@@ -10,15 +10,15 @@ import type { Guide } from '../types';
 const columnHelper = createColumnHelper<Guide>();
 
 export function Guides() {
-  const [result, reexecute] = useQuery({ query: GET_GUIDES });
-  const [, deleteGuide] = useMutation(DELETE_GUIDE);
+  const { data, loading, refetch }: any = useQuery(GET_GUIDES);
+  const [deleteGuide] = useMutation(DELETE_GUIDE);
 
-  const guides = result.data?.guides?.nodes ?? [];
+  const guides = data?.guides?.nodes ?? [];
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this guide?')) return;
-    await deleteGuide({ id });
-    reexecute({ requestPolicy: 'network-only' });
+    await deleteGuide({ variables: { id } });
+    refetch();
   };
 
   const columns = [
@@ -75,7 +75,7 @@ export function Guides() {
         </Link>
       </div>
 
-      {result.fetching ? (
+      {loading ? (
         <div className="text-center py-12 text-gray-500">Loading guides...</div>
       ) : (
         <DataTable data={guides} columns={columns} searchPlaceholder="Search guides..." />

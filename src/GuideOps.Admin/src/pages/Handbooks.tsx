@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from 'urql';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
 import { DataTable } from '../components/DataTable';
@@ -10,15 +10,15 @@ import type { Handbook } from '../types';
 const columnHelper = createColumnHelper<Handbook>();
 
 export function Handbooks() {
-  const [result, reexecute] = useQuery({ query: GET_HANDBOOKS });
-  const [, deleteHandbook] = useMutation(DELETE_HANDBOOK);
+  const { data, loading, refetch }: any = useQuery(GET_HANDBOOKS);
+  const [deleteHandbook] = useMutation(DELETE_HANDBOOK);
 
-  const handbooks = result.data?.handbooks?.nodes ?? [];
+  const handbooks = data?.handbooks?.nodes ?? [];
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this handbook?')) return;
-    await deleteHandbook({ id });
-    reexecute({ requestPolicy: 'network-only' });
+    await deleteHandbook({ variables: { id } });
+    refetch();
   };
 
   const columns = [
@@ -70,7 +70,7 @@ export function Handbooks() {
         </Link>
       </div>
 
-      {result.fetching ? (
+      {loading ? (
         <div className="text-center py-12 text-gray-500">Loading handbooks...</div>
       ) : (
         <DataTable data={handbooks} columns={columns} searchPlaceholder="Search handbooks..." />
