@@ -12,7 +12,8 @@ public class GuideOpsDbContext(DbContextOptions<GuideOpsDbContext> options) : Db
     public DbSet<Handbook> Handbooks => Set<Handbook>();
     public DbSet<Acknowledgment> Acknowledgments => Set<Acknowledgment>();
     public DbSet<GuideCompletion> GuideCompletions => Set<GuideCompletion>();
-    public DbSet<Assignment> Assignments => Set<Assignment>();
+    public DbSet<GuideAssignment> GuideAssignments => Set<GuideAssignment>();
+    public DbSet<HandbookAssignment> HandbookAssignments => Set<HandbookAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -103,29 +104,30 @@ public class GuideOpsDbContext(DbContextOptions<GuideOpsDbContext> options) : Db
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Assignment (polymorphic)
-        modelBuilder.Entity<Assignment>(entity =>
+        // GuideAssignment
+        modelBuilder.Entity<GuideAssignment>(entity =>
         {
-            entity.HasIndex(e => new { e.TargetType, e.TargetId });
-            entity.HasIndex(e => new { e.AssignToRole, e.SchoolYear });
-            entity.Property(e => e.TargetType).HasMaxLength(50);
+            entity.HasIndex(e => new { e.GuideId, e.AssignToRole, e.SchoolYear });
             entity.Property(e => e.AssignToRole).HasMaxLength(50);
             entity.Property(e => e.SchoolYear).HasMaxLength(9);
 
-            // Conditional relationships for polymorphic design
             entity.HasOne(e => e.Guide)
                 .WithMany(g => g.Assignments)
-                .HasForeignKey(e => e.TargetId)
-                .HasPrincipalKey(g => g.Id)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(e => e.GuideId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // HandbookAssignment
+        modelBuilder.Entity<HandbookAssignment>(entity =>
+        {
+            entity.HasIndex(e => new { e.HandbookId, e.AssignToRole, e.SchoolYear });
+            entity.Property(e => e.AssignToRole).HasMaxLength(50);
+            entity.Property(e => e.SchoolYear).HasMaxLength(9);
 
             entity.HasOne(e => e.Handbook)
                 .WithMany(h => h.Assignments)
-                .HasForeignKey(e => e.TargetId)
-                .HasPrincipalKey(h => h.Id)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(e => e.HandbookId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Seed test users

@@ -15,5 +15,5 @@ public class Guide
 
     public ICollection<GuideStep> Steps { get; set; } = [];
     public ICollection<GuideCompletion> Completions { get; set; } = [];
-    public ICollection<Assignment> Assignments { get; set; } = [];
+    public ICollection<GuideAssignment> Assignments { get; set; } = [];
 }

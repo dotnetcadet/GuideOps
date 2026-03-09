@@ -44,8 +44,7 @@ public partial class QueryType
                 && g.SchoolYear == schoolYear
                 && !completedGuideIds.Contains(g.Id)
                 && g.Assignments.Any(a =>
-                    a.TargetType == "Guide"
-                    && a.IsActive
+                    a.IsActive
                     && a.SchoolYear == schoolYear
                     && (a.AssignToRole == "All" || a.AssignToRole == user.Role)))
             .OrderBy(g => g.Priority)

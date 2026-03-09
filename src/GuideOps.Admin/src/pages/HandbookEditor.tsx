@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { SchoolYearPicker } from '../components/SchoolYearPicker';
 import { GET_HANDBOOK_BY_ID } from '../graphql/queries';
-import { CREATE_HANDBOOK, UPDATE_HANDBOOK, CREATE_ASSIGNMENT, DELETE_ASSIGNMENT } from '../graphql/mutations';
+import { CREATE_HANDBOOK, UPDATE_HANDBOOK, CREATE_HANDBOOK_ASSIGNMENT, DELETE_HANDBOOK_ASSIGNMENT } from '../graphql/mutations';
 
 export function HandbookEditor() {
   const { id } = useParams();
@@ -16,8 +16,8 @@ export function HandbookEditor() {
   });
   const [createHandbook] = useMutation(CREATE_HANDBOOK);
   const [updateHandbook] = useMutation(UPDATE_HANDBOOK);
-  const [createAssignment] = useMutation(CREATE_ASSIGNMENT);
-  const [deleteAssignment] = useMutation(DELETE_ASSIGNMENT);
+  const [createHandbookAssignment] = useMutation(CREATE_HANDBOOK_ASSIGNMENT);
+  const [deleteHandbookAssignment] = useMutation(DELETE_HANDBOOK_ASSIGNMENT);
 
   const [form, setForm] = useState({
     title: '',
@@ -75,14 +75,13 @@ export function HandbookEditor() {
       // Handle assignment
       if (!isNew && handbookData?.handbookById?.assignments?.length > 0) {
         for (const a of handbookData.handbookById.assignments) {
-          await deleteAssignment({ variables: { id: a.id } });
+          await deleteHandbookAssignment({ variables: { id: a.id } });
         }
       }
-      await createAssignment({
+      await createHandbookAssignment({
         variables: {
           input: {
-            targetType: 'Handbook',
-            targetId: handbookId,
+            handbookId,
             assignToRole,
             schoolYear: form.schoolYear,
           },

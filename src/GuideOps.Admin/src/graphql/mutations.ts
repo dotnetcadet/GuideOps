@@ -75,21 +75,37 @@ export const DELETE_HANDBOOK = gql`
   }
 `;
 
-export const CREATE_ASSIGNMENT = gql`
-  mutation CreateAssignment($input: CreateAssignmentInput!) {
-    createAssignment(input: $input) {
+export const CREATE_GUIDE_ASSIGNMENT = gql`
+  mutation CreateGuideAssignment($input: CreateGuideAssignmentInput!) {
+    createGuideAssignment(input: $input) {
       id
-      targetType
-      targetId
+      guideId
       assignToRole
       schoolYear
     }
   }
 `;
 
-export const DELETE_ASSIGNMENT = gql`
-  mutation DeleteAssignment($id: Int!) {
-    deleteAssignment(id: $id)
+export const DELETE_GUIDE_ASSIGNMENT = gql`
+  mutation DeleteGuideAssignment($id: Int!) {
+    deleteGuideAssignment(id: $id)
+  }
+`;
+
+export const CREATE_HANDBOOK_ASSIGNMENT = gql`
+  mutation CreateHandbookAssignment($input: CreateHandbookAssignmentInput!) {
+    createHandbookAssignment(input: $input) {
+      id
+      handbookId
+      assignToRole
+      schoolYear
+    }
+  }
+`;
+
+export const DELETE_HANDBOOK_ASSIGNMENT = gql`
+  mutation DeleteHandbookAssignment($id: Int!) {
+    deleteHandbookAssignment(id: $id)
   }
 `;
 

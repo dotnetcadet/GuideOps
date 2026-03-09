@@ -13,5 +13,5 @@ public class Handbook
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<Acknowledgment> Acknowledgments { get; set; } = [];
-    public ICollection<Assignment> Assignments { get; set; } = [];
+    public ICollection<HandbookAssignment> Assignments { get; set; } = [];
 }

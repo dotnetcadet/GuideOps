@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { StepEditor } from '../components/StepEditor';
 import { SchoolYearPicker } from '../components/SchoolYearPicker';
 import { GET_GUIDE_BY_ID } from '../graphql/queries';
-import { CREATE_GUIDE, UPDATE_GUIDE, SET_GUIDE_STEPS, CREATE_ASSIGNMENT, DELETE_ASSIGNMENT } from '../graphql/mutations';
+import { CREATE_GUIDE, UPDATE_GUIDE, SET_GUIDE_STEPS, CREATE_GUIDE_ASSIGNMENT, DELETE_GUIDE_ASSIGNMENT } from '../graphql/mutations';
 import type { GuideStep } from '../types';
 
 export function GuideEditor() {
@@ -19,8 +19,8 @@ export function GuideEditor() {
   const [createGuide] = useMutation(CREATE_GUIDE);
   const [updateGuide] = useMutation(UPDATE_GUIDE);
   const [setGuideSteps] = useMutation(SET_GUIDE_STEPS);
-  const [createAssignment] = useMutation(CREATE_ASSIGNMENT);
-  const [deleteAssignment] = useMutation(DELETE_ASSIGNMENT);
+  const [createGuideAssignment] = useMutation(CREATE_GUIDE_ASSIGNMENT);
+  const [deleteGuideAssignment] = useMutation(DELETE_GUIDE_ASSIGNMENT);
 
   const [form, setForm] = useState({
     title: '',
@@ -94,14 +94,13 @@ export function GuideEditor() {
       // Handle assignment
       if (!isNew && guideData?.guideById?.assignments?.length > 0) {
         for (const a of guideData.guideById.assignments) {
-          await deleteAssignment({ variables: { id: a.id } });
+          await deleteGuideAssignment({ variables: { id: a.id } });
         }
       }
-      await createAssignment({
+      await createGuideAssignment({
         variables: {
           input: {
-            targetType: 'Guide',
-            targetId: guideId,
+            guideId,
             assignToRole,
             schoolYear: form.schoolYear,
           },

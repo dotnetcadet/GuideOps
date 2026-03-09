@@ -24,7 +24,7 @@ export interface Guide {
   updatedAt: string;
   createdBy: string;
   steps: GuideStep[];
-  assignments?: Assignment[];
+  assignments?: GuideAssignment[];
 }
 
 export interface GuideStep {
@@ -48,7 +48,7 @@ export interface Handbook {
   requiresAcknowledgment: boolean;
   createdAt: string;
   updatedAt: string;
-  assignments?: Assignment[];
+  assignments?: HandbookAssignment[];
 }
 
 export interface Acknowledgment {
@@ -71,10 +71,18 @@ export interface GuideCompletion {
   guide?: Guide;
 }
 
-export interface Assignment {
+export interface GuideAssignment {
   id: number;
-  targetType: string;
-  targetId: number;
+  guideId: number;
+  assignToRole: string;
+  schoolYear: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface HandbookAssignment {
+  id: number;
+  handbookId: number;
   assignToRole: string;
   schoolYear: string;
   isActive: boolean;

@@ -42,8 +42,7 @@ public partial class QueryType
                 && h.SchoolYear == schoolYear
                 && !acknowledgedHandbookIds.Contains(h.Id)
                 && h.Assignments.Any(a =>
-                    a.TargetType == "Handbook"
-                    && a.IsActive
+                    a.IsActive
                     && a.SchoolYear == schoolYear
                     && (a.AssignToRole == "All" || a.AssignToRole == user.Role)))
             .ToListAsync();

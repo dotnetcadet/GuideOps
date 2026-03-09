@@ -28,7 +28,7 @@ public partial class QueryType
             return new AcknowledgmentStats(0, 0, 0);
 
         var assignedRoles = handbook.Assignments
-            .Where(a => a.TargetType == "Handbook" && a.IsActive && a.SchoolYear == schoolYear)
+            .Where(a => a.IsActive && a.SchoolYear == schoolYear)
             .Select(a => a.AssignToRole)
             .ToList();
 
