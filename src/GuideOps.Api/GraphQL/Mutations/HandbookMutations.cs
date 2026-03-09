@@ -3,10 +3,9 @@ using GuideOps.Api.Models;
 
 namespace GuideOps.Api.GraphQL.Mutations;
 
-[MutationType]
-public static class HandbookMutations
+public partial class MutationType
 {
-    public static async Task<Handbook> CreateHandbook(GuideOpsDbContext context, CreateHandbookInput input)
+    public async Task<Handbook> CreateHandbook(GuideOpsDbContext context, CreateHandbookInput input)
     {
         var handbook = new Handbook
         {
@@ -23,7 +22,7 @@ public static class HandbookMutations
         return handbook;
     }
 
-    public static async Task<Handbook?> UpdateHandbook(GuideOpsDbContext context, int id, UpdateHandbookInput input)
+    public async Task<Handbook?> UpdateHandbook(GuideOpsDbContext context, int id, UpdateHandbookInput input)
     {
         var handbook = await context.Handbooks.FindAsync(id);
         if (handbook is null) return null;
@@ -40,7 +39,7 @@ public static class HandbookMutations
         return handbook;
     }
 
-    public static async Task<bool> DeleteHandbook(GuideOpsDbContext context, int id)
+    public async Task<bool> DeleteHandbook(GuideOpsDbContext context, int id)
     {
         var handbook = await context.Handbooks.FindAsync(id);
         if (handbook is null) return false;

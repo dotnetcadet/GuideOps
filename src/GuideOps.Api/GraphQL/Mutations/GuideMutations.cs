@@ -4,10 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GuideOps.Api.GraphQL.Mutations;
 
-[MutationType]
-public static class GuideMutations
+public partial class MutationType
 {
-    public static async Task<Guide> CreateGuide(GuideOpsDbContext context, CreateGuideInput input)
+    public async Task<Guide> CreateGuide(GuideOpsDbContext context, CreateGuideInput input)
     {
         var guide = new Guide
         {
@@ -25,7 +24,7 @@ public static class GuideMutations
         return guide;
     }
 
-    public static async Task<Guide?> UpdateGuide(GuideOpsDbContext context, int id, UpdateGuideInput input)
+    public async Task<Guide?> UpdateGuide(GuideOpsDbContext context, int id, UpdateGuideInput input)
     {
         var guide = await context.Guides.FindAsync(id);
         if (guide is null) return null;
@@ -42,7 +41,7 @@ public static class GuideMutations
         return guide;
     }
 
-    public static async Task<bool> DeleteGuide(GuideOpsDbContext context, int id)
+    public async Task<bool> DeleteGuide(GuideOpsDbContext context, int id)
     {
         var guide = await context.Guides.FindAsync(id);
         if (guide is null) return false;
@@ -52,7 +51,7 @@ public static class GuideMutations
         return true;
     }
 
-    public static async Task<Guide?> SetGuideSteps(
+    public async Task<Guide?> SetGuideSteps(
         GuideOpsDbContext context,
         int guideId,
         List<GuideStepInput> steps)

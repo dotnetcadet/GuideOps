@@ -4,16 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GuideOps.Api.GraphQL.Queries;
 
-[QueryType]
-public static class GuideQueries
+
+public partial class QueryType
 {
     [UsePaging]
     [UseFiltering]
     [UseSorting]
-    public static IQueryable<Guide> GetGuides(GuideOpsDbContext context)
+    public IQueryable<Guide> GetGuides(GuideOpsDbContext context)
         => context.Guides.Include(g => g.Steps.OrderBy(s => s.StepOrder));
 
-    public static async Task<Guide?> GetGuideById(GuideOpsDbContext context, int id)
+    public async Task<Guide?> GetGuideById(GuideOpsDbContext context, int id)
         => await context.Guides
             .Include(g => g.Steps.OrderBy(s => s.StepOrder))
             .Include(g => g.Assignments)
@@ -23,7 +23,7 @@ public static class GuideQueries
     /// Gets guides assigned to the current user's role that haven't been completed yet.
     /// Used by the SDK to fetch active guides for a user.
     /// </summary>
-    public static async Task<List<Guide>> GetAssignedGuides(
+    public async Task<List<Guide>> GetAssignedGuides(
         GuideOpsDbContext context,
         string azureAdObjectId,
         string schoolYear)

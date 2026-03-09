@@ -3,10 +3,9 @@ using GuideOps.Api.Models;
 
 namespace GuideOps.Api.GraphQL.Mutations;
 
-[MutationType]
-public static class AssignmentMutations
+public partial class MutationType
 {
-    public static async Task<Assignment> CreateAssignment(
+    public async Task<Assignment> CreateAssignment(
         GuideOpsDbContext context,
         CreateAssignmentInput input)
     {
@@ -24,7 +23,7 @@ public static class AssignmentMutations
         return assignment;
     }
 
-    public static async Task<bool> DeleteAssignment(GuideOpsDbContext context, int id)
+    public async Task<bool> DeleteAssignment(GuideOpsDbContext context, int id)
     {
         var assignment = await context.Assignments.FindAsync(id);
         if (assignment is null) return false;
@@ -34,11 +33,7 @@ public static class AssignmentMutations
         return true;
     }
 
-    [UsePaging]
-    [UseFiltering]
-    [UseSorting]
-    public static IQueryable<Assignment> GetAssignments(GuideOpsDbContext context)
-        => context.Assignments;
+    
 }
 
 public record CreateAssignmentInput(

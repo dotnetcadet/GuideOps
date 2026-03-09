@@ -1,14 +1,14 @@
-import { Configuration, LogLevel } from '@azure/msal-browser';
+import { type Configuration, LogLevel } from '@azure/msal-browser';
 
 export const msalConfig: Configuration = {
   auth: {
-    clientId: import.meta.env.VITE_AZURE_CLIENT_ID || 'YOUR_ADMIN_CLIENT_ID',
-    authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID || 'YOUR_TENANT_ID'}`,
+    clientId: '2fdee750-016a-4613-ab5b-5439b01d6a9c',
+    authority: `https://login.microsoftonline.com/29967363-a86a-4ea6-8f76-29aa44ec6f27`, //${import.meta.env.VITE_AZURE_TENANT_ID}`,
     redirectUri: window.location.origin,
   },
   cache: {
     cacheLocation: 'sessionStorage',
-    storeAuthStateInCookie: false,
+    // storeAuthStateInCookie: false,
   },
   system: {
     loggerOptions: {
@@ -21,10 +21,11 @@ export const msalConfig: Configuration = {
   },
 };
 
+
 export const loginRequest = {
-  scopes: [`api://${import.meta.env.VITE_API_CLIENT_ID || 'YOUR_API_CLIENT_ID'}/access_as_user`],
+  scopes: [`api://2fdee750-016a-4613-ab5b-5439b01d6a9c/default`],
 };
 
 export const graphqlScopes = {
-  scopes: [`api://${import.meta.env.VITE_API_CLIENT_ID || 'YOUR_API_CLIENT_ID'}/access_as_user`],
+  scopes: [`api://2fdee750-016a-4613-ab5b-5439b01d6a9c/default`],
 };

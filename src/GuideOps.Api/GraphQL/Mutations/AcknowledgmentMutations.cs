@@ -4,10 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GuideOps.Api.GraphQL.Mutations;
 
-[MutationType]
-public static class AcknowledgmentMutations
+public partial class MutationType
 {
-    public static async Task<Acknowledgment?> RecordAcknowledgment(
+    public async Task<Acknowledgment?> RecordAcknowledgment(
         GuideOpsDbContext context,
         RecordAcknowledgmentInput input)
     {
@@ -44,7 +43,7 @@ public static class AcknowledgmentMutations
             .FirstAsync(a => a.Id == acknowledgment.Id);
     }
 
-    public static async Task<GuideCompletion?> RecordGuideCompletion(
+    public async Task<GuideCompletion?> RecordGuideCompletion(
         GuideOpsDbContext context,
         string azureAdObjectId,
         int guideId)

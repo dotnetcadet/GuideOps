@@ -4,16 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GuideOps.Api.GraphQL.Queries;
 
-[QueryType]
-public static class HandbookQueries
+public partial class QueryType
 {
     [UsePaging]
     [UseFiltering]
     [UseSorting]
-    public static IQueryable<Handbook> GetHandbooks(GuideOpsDbContext context)
+    public IQueryable<Handbook> GetHandbooks(GuideOpsDbContext context)
         => context.Handbooks;
 
-    public static async Task<Handbook?> GetHandbookById(GuideOpsDbContext context, int id)
+    public async Task<Handbook?> GetHandbookById(GuideOpsDbContext context, int id)
         => await context.Handbooks
             .Include(h => h.Assignments)
             .FirstOrDefaultAsync(h => h.Id == id);
@@ -22,7 +21,7 @@ public static class HandbookQueries
     /// Gets handbooks assigned to the current user's role that haven't been acknowledged yet.
     /// Used by the SDK to determine which handbooks need acknowledgment before access is granted.
     /// </summary>
-    public static async Task<List<Handbook>> GetPendingHandbooks(
+    public async Task<List<Handbook>> GetPendingHandbooks(
         GuideOpsDbContext context,
         string azureAdObjectId,
         string schoolYear)

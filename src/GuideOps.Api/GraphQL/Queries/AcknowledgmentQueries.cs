@@ -4,18 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GuideOps.Api.GraphQL.Queries;
 
-[QueryType]
-public static class AcknowledgmentQueries
+//[QueryType]
+public partial class QueryType
 {
     [UsePaging]
     [UseFiltering]
     [UseSorting]
-    public static IQueryable<Acknowledgment> GetAcknowledgments(GuideOpsDbContext context)
+    public IQueryable<Acknowledgment> GetAcknowledgments(GuideOpsDbContext context)
         => context.Acknowledgments
             .Include(a => a.User)
             .Include(a => a.Handbook);
 
-    public static async Task<AcknowledgmentStats> GetAcknowledgmentStats(
+    public async Task<AcknowledgmentStats> GetAcknowledgmentStats(
         GuideOpsDbContext context,
         string schoolYear,
         int handbookId)
@@ -43,7 +43,7 @@ public static class AcknowledgmentQueries
         return new AcknowledgmentStats(totalAssigned, acknowledgedCount, totalAssigned - acknowledgedCount);
     }
 
-    public static async Task<bool> HasUserAcknowledged(
+    public async Task<bool> HasUserAcknowledged(
         GuideOpsDbContext context,
         string azureAdObjectId,
         int handbookId,

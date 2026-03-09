@@ -1,4 +1,7 @@
 using GuideOps.Api.Data;
+using GuideOps.Api.GraphQL.Mutations;
+using GuideOps.Api.GraphQL.Queries;
+using GuideOps.Api.GraphQL.Types;
 using GuideOps.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -9,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<GuideOpsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Azure AD Authentication
+//Azure AD Authentication
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd");
 
 // Azure AD Sync Service
@@ -18,11 +21,11 @@ builder.Services.AddScoped<IAzureAdSyncService, AzureAdSyncService>();
 // GraphQL
 builder.Services
     .AddGraphQLServer()
-    .AddQueryType()
-    .AddMutationType()
-    .AddType<GuideOps.Api.GraphQL.Types.UserType>()
-    .AddType<GuideOps.Api.GraphQL.Types.GuideType>()
-    .AddType<GuideOps.Api.GraphQL.Types.HandbookType>()
+    .AddQueryType<QueryType>()
+    .AddMutationType<MutationType>()
+    .AddType<UserType>()
+    .AddType<GuideType>()
+    .AddType<HandbookType>()
     .AddFiltering()
     .AddSorting()
     .AddProjections()
