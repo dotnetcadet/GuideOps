@@ -1,3 +1,4 @@
+using Azure.Identity;
 using GuideOps.Api.Data;
 using GuideOps.Api.GraphQL.Mutations;
 using GuideOps.Api.GraphQL.Queries;
@@ -5,9 +6,32 @@ using GuideOps.Api.GraphQL.Types;
 using GuideOps.Api.Models;
 using GuideOps.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<GraphServiceClient>(serviceProvider =>
+{
+
+    var configuration = serviceProvider
+        .GetRequiredService<IConfiguration>();
+
+    var options = new ClientSecretCredentialOptions
+    {
+        AuthorityHost = AzureAuthorityHosts.AzurePublicCloud,
+    };
+
+    var credentials = new ClientSecretCredential(
+        configuration["AzureAd:TenantId"],
+        configuration["AzureAd:ClientId"],
+        configuration["AzureAd:ClientSecret"],
+        options);
+
+    return new GraphServiceClient(
+        credentials,
+        ["https://graph.microsoft.com/.default"]);
+});
 
 // Database
 builder.Services.AddPooledDbContextFactory<GuideOpsDbContext>(options =>

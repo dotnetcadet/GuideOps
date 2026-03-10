@@ -1,6 +1,7 @@
 using GuideOps.Api.Data;
 using GuideOps.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph;
 
 namespace GuideOps.Api.Services;
 
@@ -15,48 +16,51 @@ public interface IAzureAdSyncService
 /// </summary>
 public class AzureAdSyncService : IAzureAdSyncService
 {
+    private readonly GraphServiceClient _client;
+
+    public AzureAdSyncService(GraphServiceClient client)
+    {
+        _client = client;
+    }
+
+
     public async Task<SyncResult> SyncUsersAsync(GuideOpsDbContext context)
     {
         // In production, this would call Microsoft Graph API:
         // var graphClient = new GraphServiceClient(credential);
-        // var users = await graphClient.Users.GetAsync();
+        var users = await _client.Users.GetAsync();
 
-        // For the PoC, we simulate by seeding sample users if none exist
-        var existingCount = await context.Users.CountAsync();
-        if (existingCount > 0)
+        var now = DateTime.UtcNow;
+        var userSet = context.Set<User>();
+        int added = 0;
+
+        foreach (var user in users.Value)
         {
-            return new SyncResult(0, existingCount, 0);
+            var existing = userSet.FirstOrDefault(p => p.AzureAdObjectId == user.Id);
+
+            if (existing is null)
+            {
+                var newUser = new Models.User
+                {
+                    AzureAdObjectId = user.Id,
+                    DisplayName = user.DisplayName,
+                    Email = user.Mail ?? "N/A",
+                    Role = "Teacher",
+                    IsActive = true,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+
+                userSet.Add(newUser);
+
+                added++;
+            }
         }
 
-        var sampleUsers = GenerateSampleUsers();
-        context.Users.AddRange(sampleUsers);
+
         await context.SaveChangesAsync();
 
-        return new SyncResult(sampleUsers.Count, 0, 0);
-    }
-
-    private static List<User> GenerateSampleUsers()
-    {
-        var users = new List<User>();
-        var roles = new[] { "Student", "Student", "Student", "Student", "Teacher", "Admin" };
-
-        for (int i = 1; i <= 50; i++)
-        {
-            var role = roles[(i - 1) % roles.Length];
-            users.Add(new User
-            {
-                AzureAdObjectId = Guid.NewGuid().ToString(),
-                DisplayName = $"{role} User {i}",
-                Email = $"{role.ToLower()}{i}@edio.example.com",
-                Role = role,
-                IsActive = true,
-                LastSyncedAt = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-        }
-
-        return users;
+        return new SyncResult(added,0, 0);
     }
 }
 
