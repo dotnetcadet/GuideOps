@@ -25,16 +25,16 @@ interface GuideOpsProviderProps {
 }
 
 export function GuideOpsProvider({ config, children }: GuideOpsProviderProps) {
-  const value = useMemo(() => ({
-    client: createGuideOpsClient(),
-    config,
-  }), [config]);
+  const apolloClient = useApolloClient(config);
 
-  const client = useApolloClient()
+  const value = useMemo(() => ({
+    client: createGuideOpsClient(apolloClient),
+    config,
+  }), [apolloClient, config]);
 
   return (
     <GuideOpsContext.Provider value={value}>
-      <ApolloProvider client={client}>
+      <ApolloProvider client={apolloClient}>
         {children}
       </ApolloProvider>
     </GuideOpsContext.Provider>

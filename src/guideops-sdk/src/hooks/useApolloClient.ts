@@ -1,27 +1,25 @@
 import { useMemo } from 'react';
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { SetContextLink } from "@apollo/client/link/context";
-import { useGuideOpsContext } from '../GuideOpsProvider';
+import type { GuideOpsConfig } from '../types';
 
-export function useApolloClient() {
-   const { config } = useGuideOpsContext();
-
+export function useApolloClient(config: GuideOpsConfig) {
   return useMemo(() => {
-    const httpLink = new HttpLink({ 
-      uri: config.userId,
-
-    })
-    const authLink = new SetContextLink(async ({ headers }) => {
+    const httpLink = new HttpLink({
+      uri: config.apiUrl,
+    });
+    const authLink = new SetContextLink(async (prevContext) => {
       try {
-        const response = config.getAccessToken()
+        const token = await config.getAccessToken();
         return {
+          ...prevContext,
           headers: {
-            ...headers,
-            authorization: `Bearer ${response}`,
+            ...(prevContext.headers as Record<string, string>),
+            authorization: `Bearer ${token}`,
           },
         };
       } catch {
-        return { headers };
+        return prevContext;
       }
     });
     return new ApolloClient({
