@@ -9,6 +9,8 @@ export { useGuides } from './hooks/useGuides';
 export { HandbookGate } from './components/HandbookGate';
 export { HandbookModal } from './components/HandbookModal';
 export { GuideRenderer } from './components/GuideRenderer';
+export { GuideOverlay } from './components/GuideOverlay';
+export { GuideStepPopover } from './components/GuideStepPopover';
 
 // Types
 export type { GuideOpsConfig, Guide, GuideStep, Handbook, Acknowledgment } from './types';

@@ -31,11 +31,22 @@ declare interface GuideOpsProviderProps {
 }
 
 /**
- * Renders assigned guides using driver.js.
- * If autoStart is true, automatically launches the highest priority guide.
- * Can also be controlled imperatively via the useGuides() hook.
+ * Full-screen overlay that highlights a target element by cutting it out.
+ * Uses four absolutely-positioned rectangles around the target so the
+ * target element remains clickable.
  */
-export declare function GuideRenderer({ autoStart }: GuideRendererProps): null;
+export declare function GuideOverlay({ targetSelector, onClick }: GuideOverlayProps): JSX.Element;
+
+declare interface GuideOverlayProps {
+    targetSelector?: string;
+    onClick?: () => void;
+}
+
+/**
+ * Renders assigned guides as positioned step popovers with an overlay.
+ * If autoStart is true, automatically launches the highest priority guide.
+ */
+export declare function GuideRenderer({ autoStart }: GuideRendererProps): JSX.Element | null;
 
 declare interface GuideRendererProps {
     autoStart?: boolean;
@@ -49,6 +60,22 @@ export declare interface GuideStep {
     description: string;
     side: string;
     pageUrl: string | null;
+}
+
+/**
+ * Popover that renders near a target element identified by the step's
+ * elementSelector (CSS selector — id or class).  Falls back to center-screen
+ * if the target element is not found.
+ */
+export declare function GuideStepPopover({ step, stepIndex, totalSteps, onNext, onPrev, onClose, }: GuideStepPopoverProps): JSX.Element;
+
+declare interface GuideStepPopoverProps {
+    step: GuideStep;
+    stepIndex: number;
+    totalSteps: number;
+    onNext: () => void;
+    onPrev: () => void;
+    onClose: () => void;
 }
 
 export declare interface Handbook {
@@ -98,6 +125,10 @@ export declare interface UseGuidesReturn {
     startGuide: (guideId: number) => void;
     dismissGuide: (guideId: number) => Promise<void>;
     activeGuide: Guide | null;
+    currentStepIndex: number;
+    nextStep: () => void;
+    prevStep: () => void;
+    closeGuide: () => void;
     refresh: () => Promise<void>;
 }
 
