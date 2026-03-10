@@ -1,21 +1,8 @@
-import { GraphQLClient } from 'graphql-request';
-import { gql } from 'graphql-request';
+import { gql } from '@apollo/client';
 import type { Guide, Handbook, Acknowledgment } from '../types';
+import { useQuery, useMutation } from '@apollo/client/react';
 
-export function createGuideOpsClient(apiUrl: string, getAccessToken: () => Promise<string>) {
-  const client = new GraphQLClient(apiUrl, {
-    requestMiddleware: async (request) => {
-      const token = await getAccessToken();
-      return {
-        ...request,
-        headers: {
-          ...request.headers,
-          authorization: `Bearer ${token}`,
-        },
-      };
-    },
-  });
-
+export function createGuideOpsClient() {
   return {
     async getAssignedGuides(azureAdObjectId: string, schoolYear: string): Promise<Guide[]> {
       const query = gql`
@@ -38,8 +25,23 @@ export function createGuideOpsClient(apiUrl: string, getAccessToken: () => Promi
           }
         }
       `;
-      const data = await client.request<{ assignedGuides: Guide[] }>(query, { azureAdObjectId, schoolYear });
-      return data.assignedGuides;
+
+      const { data, loading }: { data: any, loading: boolean}  = useQuery(query, {
+        variables: {
+          azureAdObjectId,
+          schoolYear
+        }
+      })
+
+      while (loading) {
+        if (!loading) {
+          break
+        }
+      }
+
+      console.log(data)
+      
+      return new Promise<Guide[]>((accept, reject) => accept(data.assignedGuides as Guide[]));
     },
 
     async getPendingHandbooks(azureAdObjectId: string, schoolYear: string): Promise<Handbook[]> {
@@ -55,8 +57,22 @@ export function createGuideOpsClient(apiUrl: string, getAccessToken: () => Promi
           }
         }
       `;
-      const data = await client.request<{ pendingHandbooks: Handbook[] }>(query, { azureAdObjectId, schoolYear });
-      return data.pendingHandbooks;
+      const { data, loading }: { data: any, loading: boolean} = useQuery(query, {
+        variables: {
+          azureAdObjectId,
+          schoolYear
+        }
+      })
+
+      while (loading) {
+        if (!loading) {
+          break
+        }
+      }
+
+      console.log(data)
+      
+      return new Promise<Handbook[]>((accept, reject) => accept(data.pendingHandbooks as Handbook[]));
     },
 
     async recordAcknowledgment(
@@ -73,10 +89,20 @@ export function createGuideOpsClient(apiUrl: string, getAccessToken: () => Promi
           }
         }
       `;
-      const data = await client.request<{ recordAcknowledgment: Acknowledgment }>(mutation, {
-        input: { azureAdObjectId, handbookId, schoolYear },
-      });
-      return data.recordAcknowledgment;
+
+      const [invoke, { }]= useMutation(mutation, {
+        variables: {
+          azureAdObjectId,
+          handbookId,
+          schoolYear
+        }
+      })
+      const { data }: { data: any } = await invoke({ variables: {
+          azureAdObjectId,
+          handbookId,
+          schoolYear
+        }})
+      return data.recordAcknowledgment as Acknowledgment;
     },
 
     async recordGuideCompletion(azureAdObjectId: string, guideId: number): Promise<void> {
@@ -87,7 +113,18 @@ export function createGuideOpsClient(apiUrl: string, getAccessToken: () => Promi
           }
         }
       `;
-      await client.request(mutation, { azureAdObjectId, guideId });
+
+      const [invoke, { }]= useMutation(mutation, {
+        variables: {
+          azureAdObjectId,
+          guideId
+        }
+      })
+      const { data } = await invoke({ variables: {
+          azureAdObjectId,
+          guideId
+        }})
+  
     },
   };
 }

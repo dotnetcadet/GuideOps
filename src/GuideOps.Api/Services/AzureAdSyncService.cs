@@ -5,36 +5,33 @@ using Microsoft.Graph;
 
 namespace GuideOps.Api.Services;
 
-public interface IAzureAdSyncService
-{
-    Task<SyncResult> SyncUsersAsync(GuideOpsDbContext context);
-}
-
 /// <summary>
 /// PoC implementation that simulates Azure AD user sync.
 /// In production, this would use Microsoft Graph API to pull users from Azure AD/Entra ID.
 /// </summary>
-public class AzureAdSyncService : IAzureAdSyncService
+public class AzureAdSyncService
 {
     private readonly GraphServiceClient _client;
+    private readonly GuideOpsDbContext _context;
 
-    public AzureAdSyncService(GraphServiceClient client)
+    public AzureAdSyncService(GraphServiceClient client, GuideOpsDbContext context)
     {
         _client = client;
+        _context = context;
     }
 
 
-    public async Task<SyncResult> SyncUsersAsync(GuideOpsDbContext context)
+    public async Task<SyncResult> SyncUsersAsync()
     {
         // In production, this would call Microsoft Graph API:
         // var graphClient = new GraphServiceClient(credential);
-        var users = await _client.Users.GetAsync();
+        var response = await _client.Users.GetAsync();
 
         var now = DateTime.UtcNow;
-        var userSet = context.Set<User>();
+        var userSet = _context.Set<User>();
         int added = 0;
 
-        foreach (var user in users.Value)
+        foreach (var user in response.Value)
         {
             var existing = userSet.FirstOrDefault(p => p.AzureAdObjectId == user.Id);
 
@@ -58,7 +55,7 @@ public class AzureAdSyncService : IAzureAdSyncService
         }
 
 
-        await context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return new SyncResult(added,0, 0);
     }

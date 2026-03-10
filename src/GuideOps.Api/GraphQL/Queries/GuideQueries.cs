@@ -24,7 +24,7 @@ public partial class QueryType
     /// Used by the SDK to fetch active guides for a user.
     /// </summary>
     public async Task<List<Guide>> GetAssignedGuides(
-        GuideOpsDbContext context,
+        [Service] GuideOpsDbContext context,
         string azureAdObjectId,
         string schoolYear)
     {

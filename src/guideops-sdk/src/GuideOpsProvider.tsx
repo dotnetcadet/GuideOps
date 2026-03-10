@@ -1,6 +1,8 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { createGuideOpsClient, type GuideOpsClient } from './services/guideOpsClient';
+import { ApolloProvider } from '@apollo/client/react';
 import type { GuideOpsConfig } from './types';
+import { useApolloClient } from './hooks/useApolloClient';
 
 interface GuideOpsContextValue {
   client: GuideOpsClient;
@@ -24,13 +26,17 @@ interface GuideOpsProviderProps {
 
 export function GuideOpsProvider({ config, children }: GuideOpsProviderProps) {
   const value = useMemo(() => ({
-    client: createGuideOpsClient(config.apiUrl, config.getAccessToken),
+    client: createGuideOpsClient(),
     config,
   }), [config]);
 
+  const client = useApolloClient()
+
   return (
     <GuideOpsContext.Provider value={value}>
-      {children}
+      <ApolloProvider client={client}>
+        {children}
+      </ApolloProvider>
     </GuideOpsContext.Provider>
   );
 }

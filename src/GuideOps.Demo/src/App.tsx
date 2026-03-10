@@ -6,22 +6,14 @@ import {
   useGuides,
   type GuideOpsConfig,
 } from '@guideops/sdk';
+import { AuthGuard } from './auth/AuthGuard';
+import { graphqlScopes } from './auth/msalConfig';
+import { useMsal } from '@azure/msal-react';
 
-// Simulated MSAL token acquisition — in production, this calls msalInstance.acquireTokenSilent()
-async function getAccessToken(): Promise<string> {
-  return 'demo-bearer-token';
-}
-
-const guideOpsConfig: GuideOpsConfig = {
-  apiUrl: '/graphql',
-  getAccessToken,
-  schoolYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-  userId: 'demo-user-object-id', // Would come from MSAL account's localAccountId
-};
 
 function EdioContent() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div id="my-id-01" className="min-h-screen bg-gray-50">
       {/* Simulated Edio Navigation */}
       <nav id="edio-nav" className="bg-indigo-700 text-white px-6 py-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">Edio</h1>
@@ -78,7 +70,7 @@ function GuideControls() {
   if (isLoading || guides.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div id="my-id-02" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-gray-900">Available Guides ({guides.length})</h3>
         <button
@@ -119,17 +111,38 @@ function GuideControls() {
 }
 
 export default function App() {
+  const { accounts, instance } = useMsal();
+
+  async function getAccessToken(): Promise<string> {
+    const response = await instance.acquireTokenSilent({
+      ...graphqlScopes,
+      account: accounts[0],
+    });
+    return response.accessToken
+  }
+
+  const config: GuideOpsConfig = {
+    apiUrl: 'http://localhost:5164/graphql',
+    getAccessToken,
+    schoolYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+    userId: accounts[0]?.localAccountId, // Would come from MSAL account's localAccountId
+  };
+
+
+
   return (
-    <GuideOpsProvider config={guideOpsConfig}>
-      <HandbookGate
-        fallback={
-          <div className="flex items-center justify-center min-h-screen bg-gray-50">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
-          </div>
-        }
-      >
-        <EdioContent />
-      </HandbookGate>
-    </GuideOpsProvider>
+    <AuthGuard>
+      <GuideOpsProvider config={config}>
+        <HandbookGate
+          fallback={
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
+            </div>
+          }
+        >
+          <EdioContent />
+        </HandbookGate>
+      </GuideOpsProvider>
+    </AuthGuard>
   );
 }
