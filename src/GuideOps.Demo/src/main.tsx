@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { PublicClientApplication } from '@azure/msal-browser';
 import { MsalProvider } from '@azure/msal-react';
 import { msalConfig } from './auth/msalConfig';
+import '@guideops/sdk/styles';
 import './app.css';
 import App from './App';
 
