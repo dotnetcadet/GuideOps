@@ -6,10 +6,10 @@ function nodesFromConnection(connection: any): any[] {
 }
 
 export function Dashboard() {
-  const { data: usersData }: any = useQuery(GET_USERS);
-  const { data: guidesData }: any = useQuery(GET_GUIDES);
-  const { data: handbooksData }: any = useQuery(GET_HANDBOOKS);
-  const { data: ackData }: any = useQuery(GET_ACKNOWLEDGMENTS);
+  const { data: usersData }: any = useQuery(GET_USERS, { variables: { first: 100 } });
+  const { data: guidesData }: any = useQuery(GET_GUIDES, { variables: { first: 100 } });
+  const { data: handbooksData }: any = useQuery(GET_HANDBOOKS, { variables: { first: 100 } });
+  const { data: ackData }: any = useQuery(GET_ACKNOWLEDGMENTS, { variables: { first: 5 } });
 
   const userCount = usersData?.users?.totalCount ?? 0;
   const users = nodesFromConnection(usersData?.users);

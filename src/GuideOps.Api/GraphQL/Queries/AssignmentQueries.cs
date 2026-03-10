@@ -5,13 +5,13 @@ namespace GuideOps.Api.GraphQL.Queries;
 
 public partial class QueryType
 {
-    [UsePaging]
+    [UsePaging(IncludeTotalCount = true)]
     [UseFiltering]
     [UseSorting]
     public IQueryable<GuideAssignment> GetGuideAssignments([Service] GuideOpsDbContext context)
         => context.GuideAssignments;
 
-    [UsePaging]
+    [UsePaging(IncludeTotalCount = true)]
     [UseFiltering]
     [UseSorting]
     public IQueryable<HandbookAssignment> GetHandbookAssignments([Service] GuideOpsDbContext context)

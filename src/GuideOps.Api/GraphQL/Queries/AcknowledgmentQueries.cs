@@ -7,7 +7,7 @@ namespace GuideOps.Api.GraphQL.Queries;
 //[QueryType]
 public partial class QueryType
 {
-    [UsePaging]
+    [UsePaging(IncludeTotalCount = true)]
     [UseFiltering]
     [UseSorting]
     public IQueryable<Acknowledgment> GetAcknowledgments([Service] GuideOpsDbContext context)

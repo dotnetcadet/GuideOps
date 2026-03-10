@@ -4,6 +4,7 @@ import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { GET_USERS } from '../graphql/queries';
 import { SYNC_USERS } from '../graphql/mutations';
+import { useCursorPagination } from '../hooks/useCursorPagination';
 import type { User } from '../types';
 
 const columnHelper = createColumnHelper<User>();
@@ -34,10 +35,13 @@ const columns = [
 ];
 
 export function Users() {
-  const { data, loading, refetch }: any = useQuery(GET_USERS);
+  const { variables, pageSize, goToNextPage, goToPreviousPage, changePageSize } = useCursorPagination();
+  const { data, loading, refetch }: any = useQuery(GET_USERS, { variables });
   const [syncUsers, { data: syncData, loading: syncing }]: any = useMutation(SYNC_USERS);
 
   const users = data?.users?.edges?.map((e: any) => e.node) ?? [];
+  const pageInfo = data?.users?.pageInfo;
+  const totalCount = data?.users?.totalCount;
 
   const handleSync = async () => {
     await syncUsers();
@@ -70,11 +74,18 @@ export function Users() {
         </div>
       )}
 
-      {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading users...</div>
-      ) : (
-        <DataTable data={users} columns={columns} searchPlaceholder="Search users..." />
-      )}
+      <DataTable
+        data={users}
+        columns={columns}
+        searchPlaceholder="Search users..."
+        pageInfo={pageInfo}
+        totalCount={totalCount}
+        pageSize={pageSize}
+        loading={loading}
+        onNextPage={() => goToNextPage(pageInfo?.endCursor)}
+        onPreviousPage={() => goToPreviousPage(pageInfo?.startCursor)}
+        onPageSizeChange={changePageSize}
+      />
     </div>
   );
 }

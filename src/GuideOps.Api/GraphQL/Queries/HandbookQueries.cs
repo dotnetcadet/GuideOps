@@ -6,7 +6,7 @@ namespace GuideOps.Api.GraphQL.Queries;
 
 public partial class QueryType
 {
-    [UsePaging]
+    [UsePaging(IncludeTotalCount = true)]
     [UseFiltering]
     [UseSorting]
     public IQueryable<Handbook> GetHandbooks([Service] GuideOpsDbContext context)

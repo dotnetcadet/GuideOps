@@ -22,7 +22,7 @@ export const GET_USERS = gql`
         startCursor
         endCursor
       }
-      # totalCount
+      totalCount
     }
   }
 `;
@@ -83,7 +83,7 @@ export const GET_GUIDES = gql`
         startCursor
         endCursor
       }
-      # totalCount
+      totalCount
     }
   }
 `;
@@ -139,7 +139,7 @@ export const GET_HANDBOOKS = gql`
         startCursor
         endCursor
       }
-      # totalCount
+      totalCount
     }
   }
 `;
@@ -192,7 +192,7 @@ export const GET_ACKNOWLEDGMENTS = gql`
         startCursor
         endCursor
       }
-      # totalCount
+      totalCount
     }
   }
 `;

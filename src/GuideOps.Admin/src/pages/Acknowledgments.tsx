@@ -4,6 +4,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { DataTable } from '../components/DataTable';
 import { SchoolYearPicker } from '../components/SchoolYearPicker';
 import { GET_ACKNOWLEDGMENTS, GET_HANDBOOKS, GET_ACKNOWLEDGMENT_STATS } from '../graphql/queries';
+import { useCursorPagination } from '../hooks/useCursorPagination';
 import type { Acknowledgment, Handbook } from '../types';
 
 const columnHelper = createColumnHelper<Acknowledgment>();
@@ -26,8 +27,9 @@ export function Acknowledgments() {
   const [schoolYear, setSchoolYear] = useState(`${currentYear}-${currentYear + 1}`);
   const [selectedHandbookId, setSelectedHandbookId] = useState<number | null>(null);
 
-  const { data: ackData, loading: ackLoading }: any = useQuery(GET_ACKNOWLEDGMENTS);
-  const { data: handbooksData }: any = useQuery(GET_HANDBOOKS);
+  const { variables, pageSize, goToNextPage, goToPreviousPage, changePageSize, resetPagination } = useCursorPagination();
+  const { data: ackData, loading: ackLoading }: any = useQuery(GET_ACKNOWLEDGMENTS, { variables });
+  const { data: handbooksData }: any = useQuery(GET_HANDBOOKS, { variables: { first: 100 } });
   const { data: statsData }: any = useQuery(GET_ACKNOWLEDGMENT_STATS, {
     variables: { schoolYear, handbookId: selectedHandbookId! },
     skip: !selectedHandbookId,
@@ -39,8 +41,20 @@ export function Acknowledgments() {
     return true;
   });
 
+  const pageInfo = ackData?.acknowledgments?.pageInfo;
+  const totalCount = ackData?.acknowledgments?.totalCount;
   const handbooks = handbooksData?.handbooks?.edges?.map((e: any) => e.node) ?? [];
   const stats = statsData?.acknowledgmentStats;
+
+  const handleSchoolYearChange = (value: string) => {
+    setSchoolYear(value);
+    resetPagination();
+  };
+
+  const handleHandbookChange = (value: string) => {
+    setSelectedHandbookId(value ? Number(value) : null);
+    resetPagination();
+  };
 
   return (
     <div>
@@ -48,10 +62,10 @@ export function Acknowledgments() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-6">
-        <SchoolYearPicker value={schoolYear} onChange={setSchoolYear} />
+        <SchoolYearPicker value={schoolYear} onChange={handleSchoolYearChange} />
         <select
           value={selectedHandbookId ?? ''}
-          onChange={(e) => setSelectedHandbookId(e.target.value ? Number(e.target.value) : null)}
+          onChange={(e) => handleHandbookChange(e.target.value)}
           className="block rounded-md bg-white px-3 py-2 text-sm border border-gray-300 shadow-sm"
         >
           <option value="">All Handbooks</option>
@@ -95,11 +109,18 @@ export function Acknowledgments() {
       )}
 
       {/* Table */}
-      {ackLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading acknowledgments...</div>
-      ) : (
-        <DataTable data={acknowledgments} columns={columns} searchPlaceholder="Search acknowledgments..." />
-      )}
+      <DataTable
+        data={acknowledgments}
+        columns={columns}
+        searchPlaceholder="Search acknowledgments..."
+        pageInfo={pageInfo}
+        totalCount={totalCount}
+        pageSize={pageSize}
+        loading={ackLoading}
+        onNextPage={() => goToNextPage(pageInfo?.endCursor)}
+        onPreviousPage={() => goToPreviousPage(pageInfo?.startCursor)}
+        onPageSizeChange={changePageSize}
+      />
     </div>
   );
 }
