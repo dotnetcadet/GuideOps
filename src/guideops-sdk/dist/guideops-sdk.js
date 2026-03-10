@@ -1,5 +1,5 @@
-import { jsx as o, jsxs as b, Fragment as S } from "react/jsx-runtime";
-import { createContext as q, useMemo as _, useContext as U, useState as v, useCallback as y, useEffect as E, useRef as M } from "react";
+import { jsx as o, jsxs as b, Fragment as x } from "react/jsx-runtime";
+import { createContext as _, useMemo as M, useState as w, useCallback as A, useEffect as O, useContext as U, useRef as R } from "react";
 const F = `
   query GetAssignedGuides($azureAdObjectId: String!, $schoolYear: String!) {
     assignedGuides(azureAdObjectId: $azureAdObjectId, schoolYear: $schoolYear) {
@@ -45,151 +45,162 @@ const F = `
     }
   }
 `;
-async function C(e, t, n) {
-  var h;
-  const r = await e.getAccessToken(), d = await fetch(e.apiUrl, {
+async function L(e, n, t) {
+  var u;
+  const s = await e.getAccessToken(), r = await fetch(e.apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${r}`
+      Authorization: `Bearer ${s}`
     },
-    body: JSON.stringify({ query: t, variables: n })
+    body: JSON.stringify({ query: n, variables: t })
   });
-  if (!d.ok)
-    throw new Error(`GraphQL request failed: ${d.status} ${d.statusText}`);
-  const l = await d.json();
-  if ((h = l.errors) != null && h.length)
-    throw new Error(l.errors[0].message);
-  return l.data;
+  if (!r.ok)
+    throw new Error(`GraphQL request failed: ${r.status} ${r.statusText}`);
+  const a = await r.json();
+  if ((u = a.errors) != null && u.length)
+    throw new Error(a.errors[0].message);
+  return a.data;
 }
 function J(e) {
   return {
-    async getAssignedGuides(t, n) {
-      return (await C(
+    async getAssignedGuides(n, t) {
+      return (await L(
         e,
         F,
-        { azureAdObjectId: t, schoolYear: n }
+        { azureAdObjectId: n, schoolYear: t }
       )).assignedGuides;
     },
-    async getPendingHandbooks(t, n) {
-      return (await C(
+    async getPendingHandbooks(n, t) {
+      return (await L(
         e,
         W,
-        { azureAdObjectId: t, schoolYear: n }
+        { azureAdObjectId: n, schoolYear: t }
       )).pendingHandbooks;
     },
-    async recordAcknowledgment(t, n, r) {
-      return (await C(
+    async recordAcknowledgment(n, t, s) {
+      return (await L(
         e,
         B,
-        { input: { azureAdObjectId: t, handbookId: n, schoolYear: r } }
+        { input: { azureAdObjectId: n, handbookId: t, schoolYear: s } }
       )).recordAcknowledgment;
     },
-    async recordGuideCompletion(t, n) {
-      await C(
+    async recordGuideCompletion(n, t) {
+      await L(
         e,
         K,
-        { azureAdObjectId: t, guideId: n }
+        { azureAdObjectId: n, guideId: t }
       );
     }
   };
 }
-const R = q(null);
-function j() {
-  const e = U(R);
+const j = _(null);
+function Y() {
+  const e = U(j);
   if (!e)
     throw new Error("useGuideOpsContext must be used within a <GuideOpsProvider>");
   return e;
 }
-function se({ config: e, children: t }) {
-  const n = _(() => ({
-    client: J(e),
-    config: e
-  }), [e]);
-  return /* @__PURE__ */ o(R.Provider, { value: n, children: t });
+function se({ config: e, children: n }) {
+  const t = M(() => J(e), [e]), s = e.userId || "", [r, a] = w([]), [u, p] = w(!0), [i, l] = w(null), [c, h] = w(null), [g, N] = w(0), k = A(async () => {
+    if (s)
+      try {
+        p(!0), l(null);
+        const d = await t.getAssignedGuides(s, e.schoolYear);
+        a(d);
+      } catch (d) {
+        l(d instanceof Error ? d : new Error("Failed to fetch guides"));
+      } finally {
+        p(!1);
+      }
+  }, [t, s, e.schoolYear]);
+  O(() => {
+    k();
+  }, [k]);
+  const C = A((d) => {
+    const f = r.find((v) => v.id === d);
+    f && (h(f), N(0));
+  }, [r]), G = A(() => {
+    if (!c) return;
+    const d = c.id;
+    h(null), N(0), t.recordGuideCompletion(s, d).then(() => {
+      a((f) => f.filter((v) => v.id !== d));
+    });
+  }, [c, t, s]), E = A(() => {
+    if (!c) return;
+    const d = c.steps.slice().sort((f, v) => f.stepOrder - v.stepOrder);
+    g < d.length - 1 ? N((f) => f + 1) : G();
+  }, [c, g, G]), m = A(() => {
+    g > 0 && N((d) => d - 1);
+  }, [g]), y = A(async (d) => {
+    s && (await t.recordGuideCompletion(s, d), a((f) => f.filter((v) => v.id !== d)));
+  }, [t, s]), S = M(() => ({
+    client: t,
+    config: e,
+    guides: r,
+    isLoading: u,
+    error: i,
+    activeGuide: c,
+    currentStepIndex: g,
+    startGuide: C,
+    dismissGuide: y,
+    nextStep: E,
+    prevStep: m,
+    closeGuide: G,
+    refresh: k
+  }), [t, e, r, u, i, c, g, C, y, E, m, G, k]);
+  return /* @__PURE__ */ o(j.Provider, { value: S, children: n });
 }
 function Q() {
-  const { client: e, config: t } = j(), [n, r] = v([]), [d, l] = v(!0), [h, p] = v(null), s = t.userId || "", a = y(async () => {
-    if (s)
+  const { client: e, config: n } = Y(), [t, s] = w([]), [r, a] = w(!0), [u, p] = w(null), i = n.userId || "", l = A(async () => {
+    if (i)
       try {
-        l(!0), p(null);
-        const u = await e.getPendingHandbooks(s, t.schoolYear);
-        r(u);
-      } catch (u) {
-        p(u instanceof Error ? u : new Error("Failed to fetch handbooks"));
+        a(!0), p(null);
+        const h = await e.getPendingHandbooks(i, n.schoolYear);
+        s(h);
+      } catch (h) {
+        p(h instanceof Error ? h : new Error("Failed to fetch handbooks"));
       } finally {
-        l(!1);
+        a(!1);
       }
-  }, [e, s, t.schoolYear]);
-  E(() => {
-    a();
-  }, [a]);
-  const g = y(async (u) => {
-    if (s)
+  }, [e, i, n.schoolYear]);
+  O(() => {
+    l();
+  }, [l]);
+  const c = A(async (h) => {
+    if (i)
       try {
-        await e.recordAcknowledgment(s, u, t.schoolYear), r((c) => c.filter((G) => G.id !== u));
-      } catch (c) {
-        throw p(c instanceof Error ? c : new Error("Failed to record acknowledgment")), c;
+        await e.recordAcknowledgment(i, h, n.schoolYear), s((g) => g.filter((N) => N.id !== h));
+      } catch (g) {
+        throw p(g instanceof Error ? g : new Error("Failed to record acknowledgment")), g;
       }
-  }, [e, s, t.schoolYear]);
+  }, [e, i, n.schoolYear]);
   return {
-    pendingHandbooks: n,
-    isLoading: d,
-    error: h,
-    acknowledge: g,
-    hasAllAcknowledged: !d && n.length === 0,
-    refresh: a
+    pendingHandbooks: t,
+    isLoading: r,
+    error: u,
+    acknowledge: c,
+    hasAllAcknowledged: !r && t.length === 0,
+    refresh: l
   };
 }
 function V() {
-  const { client: e, config: t } = j(), [n, r] = v([]), [d, l] = v(!0), [h, p] = v(null), [s, a] = v(null), [g, u] = v(0), c = t.userId || "", G = y(async () => {
-    if (c)
-      try {
-        l(!0), p(null);
-        const i = await e.getAssignedGuides(c, t.schoolYear);
-        r(i);
-      } catch (i) {
-        p(i instanceof Error ? i : new Error("Failed to fetch guides"));
-      } finally {
-        l(!1);
-      }
-  }, [e, c, t.schoolYear]);
-  E(() => {
-    G();
-  }, [G]);
-  const H = y((i) => {
-    const f = n.find((w) => w.id === i);
-    f && (a(f), u(0));
-  }, [n]), k = y(() => {
-    if (!s) return;
-    const i = s.id;
-    a(null), u(0), e.recordGuideCompletion(c, i).then(() => {
-      r((f) => f.filter((w) => w.id !== i));
-    });
-  }, [s, e, c]), N = y(() => {
-    if (!s) return;
-    const i = s.steps.slice().sort((f, w) => f.stepOrder - w.stepOrder);
-    g < i.length - 1 ? u((f) => f + 1) : k();
-  }, [s, g, k]), I = y(() => {
-    g > 0 && u((i) => i - 1);
-  }, [g]), m = y(async (i) => {
-    c && (await e.recordGuideCompletion(c, i), r((f) => f.filter((w) => w.id !== i)));
-  }, [e, c]);
+  const e = Y();
   return {
-    guides: n,
-    isLoading: d,
-    error: h,
-    startGuide: H,
-    dismissGuide: m,
-    activeGuide: s,
-    currentStepIndex: g,
-    nextStep: N,
-    prevStep: I,
-    closeGuide: k,
-    refresh: G
+    guides: e.guides,
+    isLoading: e.isLoading,
+    error: e.error,
+    startGuide: e.startGuide,
+    dismissGuide: e.dismissGuide,
+    activeGuide: e.activeGuide,
+    currentStepIndex: e.currentStepIndex,
+    nextStep: e.nextStep,
+    prevStep: e.prevStep,
+    closeGuide: e.closeGuide,
+    refresh: e.refresh
   };
 }
-function X({ handbook: e, onAcknowledge: t, isAcknowledging: n }) {
+function X({ handbook: e, onAcknowledge: n, isAcknowledging: t }) {
   return /* @__PURE__ */ o("div", { className: "guideops-modal-overlay", children: /* @__PURE__ */ b("div", { className: "guideops-modal", children: [
     /* @__PURE__ */ b("div", { className: "guideops-modal-header", children: [
       /* @__PURE__ */ o("h2", { className: "guideops-modal-title", children: e.title }),
@@ -212,36 +223,36 @@ function X({ handbook: e, onAcknowledge: t, isAcknowledging: n }) {
     /* @__PURE__ */ o("div", { className: "guideops-modal-footer", children: /* @__PURE__ */ o(
       "button",
       {
-        onClick: t,
-        disabled: n,
+        onClick: n,
+        disabled: t,
         className: "guideops-acknowledge-btn",
-        children: n ? "Processing..." : "I Acknowledge"
+        children: t ? "Processing..." : "I Acknowledge"
       }
     ) })
   ] }) });
 }
-function re({ children: e, fallback: t, loadingComponent: n }) {
-  const { pendingHandbooks: r, isLoading: d, acknowledge: l, hasAllAcknowledged: h } = Q(), [p, s] = v(!1);
-  if (d)
-    return /* @__PURE__ */ o(S, { children: n || t || /* @__PURE__ */ o(Z, {}) });
-  if (h)
-    return /* @__PURE__ */ o(S, { children: e });
-  const a = r[0];
-  return a ? /* @__PURE__ */ o(
+function re({ children: e, fallback: n, loadingComponent: t }) {
+  const { pendingHandbooks: s, isLoading: r, acknowledge: a, hasAllAcknowledged: u } = Q(), [p, i] = w(!1);
+  if (r)
+    return /* @__PURE__ */ o(x, { children: t || n || /* @__PURE__ */ o(Z, {}) });
+  if (u)
+    return /* @__PURE__ */ o(x, { children: e });
+  const l = s[0];
+  return l ? /* @__PURE__ */ o(
     X,
     {
-      handbook: a,
+      handbook: l,
       onAcknowledge: async () => {
-        s(!0);
+        i(!0);
         try {
-          await l(a.id);
+          await a(l.id);
         } finally {
-          s(!1);
+          i(!1);
         }
       },
       isAcknowledging: p
     }
-  ) : /* @__PURE__ */ o(S, { children: e });
+  ) : /* @__PURE__ */ o(x, { children: e });
 }
 function Z() {
   return /* @__PURE__ */ b("div", { className: "guideops-loading", children: [
@@ -249,127 +260,127 @@ function Z() {
     /* @__PURE__ */ o("p", { children: "Loading..." })
   ] });
 }
-function ee({ targetSelector: e, onClick: t }) {
-  const [n, r] = v(null);
-  if (E(() => {
+function ee({ targetSelector: e, onClick: n }) {
+  const [t, s] = w(null);
+  if (O(() => {
     if (!e) {
-      r(null);
+      s(null);
       return;
     }
-    const a = () => {
-      const g = document.querySelector(e);
-      r(g ? g.getBoundingClientRect() : null);
+    const l = () => {
+      const c = document.querySelector(e);
+      s(c ? c.getBoundingClientRect() : null);
     };
-    return a(), window.addEventListener("resize", a), window.addEventListener("scroll", a, !0), () => {
-      window.removeEventListener("resize", a), window.removeEventListener("scroll", a, !0);
+    return l(), window.addEventListener("resize", l), window.addEventListener("scroll", l, !0), () => {
+      window.removeEventListener("resize", l), window.removeEventListener("scroll", l, !0);
     };
-  }, [e]), !n)
-    return /* @__PURE__ */ o("div", { className: "guideops-overlay", onClick: t });
-  const d = 8, l = n.top - d, h = n.left - d, p = n.width + d * 2, s = n.height + d * 2;
-  return /* @__PURE__ */ b(S, { children: [
+  }, [e]), !t)
+    return /* @__PURE__ */ o("div", { className: "guideops-overlay", onClick: n });
+  const r = 8, a = t.top - r, u = t.left - r, p = t.width + r * 2, i = t.height + r * 2;
+  return /* @__PURE__ */ b(x, { children: [
     /* @__PURE__ */ o(
       "div",
       {
         className: "guideops-overlay-segment",
-        style: { top: 0, left: 0, right: 0, height: Math.max(0, l) },
-        onClick: t
+        style: { top: 0, left: 0, right: 0, height: Math.max(0, a) },
+        onClick: n
       }
     ),
     /* @__PURE__ */ o(
       "div",
       {
         className: "guideops-overlay-segment",
-        style: { top: l + s, left: 0, right: 0, bottom: 0 },
-        onClick: t
+        style: { top: a + i, left: 0, right: 0, bottom: 0 },
+        onClick: n
       }
     ),
     /* @__PURE__ */ o(
       "div",
       {
         className: "guideops-overlay-segment",
-        style: { top: l, left: 0, width: Math.max(0, h), height: s },
-        onClick: t
+        style: { top: a, left: 0, width: Math.max(0, u), height: i },
+        onClick: n
       }
     ),
     /* @__PURE__ */ o(
       "div",
       {
         className: "guideops-overlay-segment",
-        style: { top: l, left: h + p, right: 0, height: s },
-        onClick: t
+        style: { top: a, left: u + p, right: 0, height: i },
+        onClick: n
       }
     ),
     /* @__PURE__ */ o(
       "div",
       {
         className: "guideops-highlight-ring",
-        style: { top: l, left: h, width: p, height: s }
+        style: { top: a, left: u, width: p, height: i }
       }
     )
   ] });
 }
 function te({
   step: e,
-  stepIndex: t,
-  totalSteps: n,
-  onNext: r,
-  onPrev: d,
-  onClose: l
+  stepIndex: n,
+  totalSteps: t,
+  onNext: s,
+  onPrev: r,
+  onClose: a
 }) {
-  const h = M(null), [p, s] = v(null), [a, g] = v("bottom"), [u, c] = v(!1), G = t === 0, H = t === n - 1;
-  E(() => {
-    const N = () => {
+  const u = R(null), [p, i] = w(null), [l, c] = w("bottom"), [h, g] = w(!1), N = n === 0, k = n === t - 1;
+  O(() => {
+    const G = () => {
       if (!e.elementSelector) {
-        c(!0);
+        g(!0);
         return;
       }
-      const I = document.querySelector(e.elementSelector);
-      if (!I) {
-        c(!0);
+      const E = document.querySelector(e.elementSelector);
+      if (!E) {
+        g(!0);
         return;
       }
-      c(!1);
-      const m = I.getBoundingClientRect(), i = h.current, f = (i == null ? void 0 : i.offsetWidth) ?? 320, w = (i == null ? void 0 : i.offsetHeight) ?? 200, O = 16, L = ["top", "bottom", "left", "right"].includes(e.side) ? e.side : "bottom", $ = {
+      g(!1);
+      const m = E.getBoundingClientRect(), y = u.current, S = (y == null ? void 0 : y.offsetWidth) ?? 320, d = (y == null ? void 0 : y.offsetHeight) ?? 200, f = 16, v = ["top", "bottom", "left", "right"].includes(e.side) ? e.side : "bottom", $ = {
         bottom: {
-          top: m.bottom + O,
-          left: m.left + m.width / 2 - f / 2
+          top: m.bottom + f,
+          left: m.left + m.width / 2 - S / 2
         },
         top: {
-          top: m.top - w - O,
-          left: m.left + m.width / 2 - f / 2
+          top: m.top - d - f,
+          left: m.left + m.width / 2 - S / 2
         },
         right: {
-          top: m.top + m.height / 2 - w / 2,
-          left: m.right + O
+          top: m.top + m.height / 2 - d / 2,
+          left: m.right + f
         },
         left: {
-          top: m.top + m.height / 2 - w / 2,
-          left: m.left - f - O
+          top: m.top + m.height / 2 - d / 2,
+          left: m.left - S - f
         }
-      }, Y = [L, "bottom", "top", "right", "left"], P = /* @__PURE__ */ new Set();
-      for (const x of Y) {
-        if (P.has(x)) continue;
-        P.add(x);
-        const A = $[x], T = A.top >= 0 && A.top + w <= window.innerHeight, D = A.left >= 0 && A.left + f <= window.innerWidth;
-        if (T && D) {
-          s({
-            top: Math.max(8, Math.min(A.top, window.innerHeight - w - 8)),
-            left: Math.max(8, Math.min(A.left, window.innerWidth - f - 8))
-          }), g(x);
+      }, T = [v, "bottom", "top", "right", "left"], P = /* @__PURE__ */ new Set();
+      for (const H of T) {
+        if (P.has(H)) continue;
+        P.add(H);
+        const I = $[H], D = I.top >= 0 && I.top + d <= window.innerHeight, q = I.left >= 0 && I.left + S <= window.innerWidth;
+        if (D && q) {
+          i({
+            top: Math.max(8, Math.min(I.top, window.innerHeight - d - 8)),
+            left: Math.max(8, Math.min(I.left, window.innerWidth - S - 8))
+          }), c(H);
           return;
         }
       }
-      const z = $[L];
-      s({
-        top: Math.max(8, Math.min(z.top, window.innerHeight - w - 8)),
-        left: Math.max(8, Math.min(z.left, window.innerWidth - f - 8))
-      }), g(L);
+      const z = $[v];
+      i({
+        top: Math.max(8, Math.min(z.top, window.innerHeight - d - 8)),
+        left: Math.max(8, Math.min(z.left, window.innerWidth - S - 8))
+      }), c(v);
     };
-    return requestAnimationFrame(N), window.addEventListener("resize", N), window.addEventListener("scroll", N, !0), () => {
-      window.removeEventListener("resize", N), window.removeEventListener("scroll", N, !0);
+    return requestAnimationFrame(G), window.addEventListener("resize", G), window.addEventListener("scroll", G, !0), () => {
+      window.removeEventListener("resize", G), window.removeEventListener("scroll", G, !0);
     };
   }, [e]);
-  const k = u ? {
+  const C = h ? {
     position: "fixed",
     top: "50%",
     left: "50%",
@@ -378,54 +389,54 @@ function te({
   return /* @__PURE__ */ b(
     "div",
     {
-      ref: h,
-      className: `guideops-step-popover guideops-step-popover--${a}`,
-      style: k,
+      ref: u,
+      className: `guideops-step-popover guideops-step-popover--${l}`,
+      style: C,
       children: [
-        !u && p && /* @__PURE__ */ o("div", { className: `guideops-step-arrow guideops-step-arrow--${a}` }),
+        !h && p && /* @__PURE__ */ o("div", { className: `guideops-step-arrow guideops-step-arrow--${l}` }),
         /* @__PURE__ */ b("div", { className: "guideops-step-header", children: [
           /* @__PURE__ */ b("span", { className: "guideops-step-progress", children: [
             "Step ",
-            t + 1,
+            n + 1,
             " of ",
-            n
+            t
           ] }),
-          /* @__PURE__ */ o("button", { className: "guideops-step-close", onClick: l, "aria-label": "Close guide", children: "×" })
+          /* @__PURE__ */ o("button", { className: "guideops-step-close", onClick: a, "aria-label": "Close guide", children: "×" })
         ] }),
         /* @__PURE__ */ b("div", { className: "guideops-step-body", children: [
           /* @__PURE__ */ o("h3", { className: "guideops-step-title", children: e.title }),
           /* @__PURE__ */ o("p", { className: "guideops-step-description", children: e.description })
         ] }),
         /* @__PURE__ */ b("div", { className: "guideops-step-footer", children: [
-          !G && /* @__PURE__ */ o("button", { className: "guideops-step-btn guideops-step-btn--secondary", onClick: d, children: "Previous" }),
-          /* @__PURE__ */ o("button", { className: "guideops-step-btn guideops-step-btn--primary", onClick: r, children: H ? "Done" : "Next" })
+          !N && /* @__PURE__ */ o("button", { className: "guideops-step-btn guideops-step-btn--secondary", onClick: r, children: "Previous" }),
+          /* @__PURE__ */ o("button", { className: "guideops-step-btn guideops-step-btn--primary", onClick: s, children: k ? "Done" : "Next" })
         ] })
       ]
     }
   );
 }
 function ie({ autoStart: e = !1 }) {
-  const { guides: t, startGuide: n, activeGuide: r, currentStepIndex: d, nextStep: l, prevStep: h, closeGuide: p } = V(), s = M(!1);
-  if (E(() => {
-    if (e && t.length > 0 && !r && !s.current) {
-      s.current = !0;
-      const u = setTimeout(() => {
-        n(t[0].id);
+  const { guides: n, startGuide: t, activeGuide: s, currentStepIndex: r, nextStep: a, prevStep: u, closeGuide: p } = V(), i = R(!1);
+  if (O(() => {
+    if (e && n.length > 0 && !s && !i.current) {
+      i.current = !0;
+      const h = setTimeout(() => {
+        t(n[0].id);
       }, 500);
-      return () => clearTimeout(u);
+      return () => clearTimeout(h);
     }
-  }, [e, t, r, n]), !r) return null;
-  const a = r.steps.slice().sort((u, c) => u.stepOrder - c.stepOrder), g = a[d];
-  return g ? /* @__PURE__ */ b(S, { children: [
-    /* @__PURE__ */ o(ee, { targetSelector: g.elementSelector || void 0 }),
+  }, [e, n, s, t]), !s) return null;
+  const l = s.steps.slice().sort((h, g) => h.stepOrder - g.stepOrder), c = l[r];
+  return c ? /* @__PURE__ */ b(x, { children: [
+    /* @__PURE__ */ o(ee, { targetSelector: c.elementSelector || void 0 }),
     /* @__PURE__ */ o(
       te,
       {
-        step: g,
-        stepIndex: d,
-        totalSteps: a.length,
-        onNext: l,
-        onPrev: h,
+        step: c,
+        stepIndex: r,
+        totalSteps: l.length,
+        onNext: a,
+        onPrev: u,
         onClose: p
       }
     )
