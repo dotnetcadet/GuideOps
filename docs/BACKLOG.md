@@ -10,18 +10,15 @@
 
 > Stand up production-grade Azure resources and Entra ID app registrations.
 
-### Story 1.1 — Register Entra ID Applications
+### Story 1.1 — Register Entra ID Application
 
-> **As an** infrastructure engineer, **I want** dedicated Entra ID app registrations for the API, Admin portal, and SDK **so that** each component has properly scoped permissions and secrets.
+> **As an** infrastructure engineer, **I want** a single Entra ID app registration shared by the API (BFF) and Admin portal **so that** authentication is straightforward with minimal configuration overhead.
 
 | ID | Requirement | Priority | Notes |
 |----|------------|----------|-------|
-| 1.1.1 | Register **GuideOps API** app in Entra ID (server/daemon) | P0 | Expose API permissions (scopes) for GraphQL access. Configure client credentials for MS Graph user sync. |
-| 1.1.2 | Register **GuideOps Admin Portal** app in Entra ID (SPA) | P0 | Single-page application redirect URIs. Request API scopes from 1.1.1. Restrict to admin roles via App Roles or group claims. |
-| 1.1.3 | Register **GuideOps SDK / Edio Integration** app in Entra ID (SPA) | P0 | SPA redirect URIs for Edio host app. Request read-only API scopes from 1.1.1. |
-| 1.1.4 | Configure API permission scopes (e.g., `Guides.Read`, `Guides.Write`, `Handbooks.Read`, `Handbooks.Write`, `Users.Read`) | P0 | Define granular scopes on the API registration. Admin portal requests write scopes; SDK requests read-only. |
-| 1.1.5 | Configure App Roles in Entra ID (`Admin`, `Editor`) for the Admin portal | P1 | Used to restrict who can create/edit guides and handbooks in the admin UI. |
-| 1.1.6 | Document app registration IDs, tenant ID, and scope URIs for team onboarding | P1 | |
+| 1.1.1 | Register a single **GuideOps** app in Entra ID | P0 | Shared by the Admin SPA and the backend API (BFF pattern). Configure SPA redirect URIs for the Admin portal and client credentials for MS Graph user sync. |
+| 1.1.2 | Configure standard permissions: `openid`, `profile`, `User.Read` | P0 | No custom API scopes needed. Standard OpenID Connect + basic user info. |
+| 1.1.3 | Document app registration ID, tenant ID, and redirect URIs for team onboarding | P1 | |
 
 ### Story 1.2 — Migrate Database to PostgreSQL
 
@@ -47,6 +44,19 @@
 | 1.3.3 | Set up CI/CD pipeline (build, test, deploy) | P1 | GitHub Actions or Azure DevOps. |
 | 1.3.4 | Configure environment-specific settings (dev, staging, prod) | P1 | Connection strings, Entra IDs, CORS origins. |
 | 1.3.5 | Set up production CORS origins for Admin portal and Edio domains | P0 | Currently hardcoded to `localhost:5173`/`5174`. |
+
+### Story 1.4 — Split into Separate Repositories
+
+> **As a** DevOps engineer, **I want** the SDK, backend API, and admin frontend in separate repositories **so that** each component has its own CI/CD pipeline conforming to our GitLab source control and deployment setup.
+
+| ID | Requirement | Priority | Notes |
+|----|------------|----------|-------|
+| 1.4.1 | Create separate GitLab repository for `guideops-sdk` (npm package) | P0 | Currently lives under `src/guideops-sdk` in the monorepo. |
+| 1.4.2 | Create separate GitLab repository for `GuideOps.Api` (.NET backend) | P0 | Currently lives under `src/GuideOps.Api` in the monorepo. |
+| 1.4.3 | Create separate GitLab repository for `GuideOps.Admin` (React frontend) | P0 | Currently lives under `src/GuideOps.Admin` in the monorepo. |
+| 1.4.4 | Update SDK package references — Admin and Demo apps consume SDK via registry (not `file:` link) | P0 | Depends on SDK being published to a package registry (Story 11.2). |
+| 1.4.5 | Set up independent CI/CD pipelines per repository in GitLab | P1 | Build, test, deploy per component. |
+| 1.4.6 | Document cross-repo dependency versions and release workflow | P1 | SDK version pinning in Admin/API, coordinated releases. |
 
 ---
 
@@ -301,14 +311,13 @@
 
 > The POC admin portal needs polish for production use.
 
-### Story 9.1 — Admin Authentication & Authorization
+### Story 9.1 — Admin Authentication
 
-> **As a** security admin, **I want** only authorized users with the Admin app role to access the admin portal **so that** unauthorized users cannot modify guides or handbooks.
+> **As a** security admin, **I want** Entra ID authentication enforced on all admin routes **so that** only authenticated users can access the admin portal.
 
 | ID | Requirement | Priority | Notes |
 |----|------------|----------|-------|
-| 9.1.1 | Enforce Entra ID authentication on all admin routes (POC has `AuthGuard` but needs real app registration) | P0 | |
-| 9.1.2 | Role-based access: only users with `Admin` app role can access the admin portal | P0 | |
+| 9.1.1 | Enforce Entra ID authentication on all admin routes using the shared app registration (Story 1.1) | P0 | POC has `AuthGuard` but needs the production app registration. |
 
 ### Story 9.2 — Admin UX Polish
 
@@ -326,14 +335,13 @@
 
 ## Epic 10: API — Production Hardening
 
-### Story 10.1 — API Authentication & Authorization
+### Story 10.1 — API Authentication
 
-> **As a** security engineer, **I want** JWT bearer auth enforced on all GraphQL operations with scope-based policies **so that** the API is protected and SDK consumers can only read, not write.
+> **As a** security engineer, **I want** JWT bearer auth enforced on all GraphQL operations **so that** only authenticated users can access the API.
 
 | ID | Requirement | Priority | Notes |
 |----|------------|----------|-------|
-| 10.1.1 | Enforce JWT bearer authentication on all GraphQL queries/mutations (POC registers auth but doesn't enforce `[Authorize]`) | P0 | |
-| 10.1.2 | Add authorization policies: read-only for SDK consumers, read-write for admin | P0 | Map to Entra ID scopes from 1.1.4. |
+| 10.1.1 | Enforce JWT bearer authentication on all GraphQL queries/mutations (POC registers auth but doesn't enforce `[Authorize]`) | P0 | Uses the shared Entra ID app registration (Story 1.1). |
 
 ### Story 10.2 — API Reliability & Observability
 
@@ -387,7 +395,7 @@
 
 | Epic | Stories | Focus |
 |------|---------|-------|
-| 1. Infrastructure & App Registration | 3 | Entra ID, PostgreSQL, CI/CD |
+| 1. Infrastructure & App Registration | 4 | Entra ID, PostgreSQL, CI/CD, repo split |
 | 2. Project-Level Multi-App Support | 4 | Project entity, scoped queries, SDK config, admin switcher |
 | 3. Guide Persistence | 2 | Acceptance tracking, accept/dismiss UX |
 | 4. Segments | 3 | Segment model, assignment queries, admin UI |
@@ -398,7 +406,7 @@
 | 9. Admin Hardening | 2 | Auth/authz, UX polish |
 | 10. API Hardening | 2 | Auth/authz, reliability |
 | 11. SDK Hardening | 2 | Error resilience, testing/distribution |
-| **Total** | **27 stories** | |
+| **Total** | **28 stories** | |
 
 ### Suggested Sprint Breakdown (April–June)
 

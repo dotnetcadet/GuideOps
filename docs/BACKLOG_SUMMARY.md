@@ -1,15 +1,12 @@
 # GuideOps Production Backlog — Summary
 
-**Target Deadline:** June 2026 | **Security Model:** Microsoft Entra ID | **27 Stories across 11 Epics**
+**Target Deadline:** June 2026 | **Security Model:** Microsoft Entra ID | **28 Stories across 11 Epics**
 
 | Epic | Summary | Story | Requirements | Notes |
 |------|---------|-------|-------------|-------|
-| 1. Infrastructure & App Registration | Stand up production-grade Azure resources and Entra ID app registrations. | **1.1 — Register Entra ID Applications** | 1. Register GuideOps API app in Entra ID (server/daemon) | Expose API permissions (scopes) for GraphQL access. Configure client credentials for MS Graph user sync. |
-| | | | 2. Register GuideOps Admin Portal app in Entra ID (SPA) | SPA redirect URIs. Request API scopes. Restrict to admin roles via App Roles or group claims. |
-| | | | 3. Register GuideOps SDK / Edio Integration app in Entra ID (SPA) | SPA redirect URIs for Edio host app. Request read-only API scopes. |
-| | | | 4. Configure API permission scopes (`Guides.Read`, `Guides.Write`, `Handbooks.Read`, `Handbooks.Write`, `Users.Read`) | Admin portal requests write scopes; SDK requests read-only. |
-| | | | 5. Configure App Roles in Entra ID (`Admin`, `Editor`) for the Admin portal | Restrict who can create/edit guides and handbooks. |
-| | | | 6. Document app registration IDs, tenant ID, and scope URIs for team onboarding | |
+| 1. Infrastructure & App Registration | Stand up production-grade Azure resources and Entra ID app registration. | **1.1 — Register Entra ID Application** | 1. Register a single **GuideOps** app in Entra ID | Shared by Admin SPA and backend API (BFF pattern). Configure SPA redirect URIs and client credentials for MS Graph user sync. |
+| | | | 2. Configure standard permissions: `openid`, `profile`, `User.Read` | No custom API scopes needed. Standard OpenID Connect + basic user info. |
+| | | | 3. Document app registration ID, tenant ID, and redirect URIs for team onboarding | |
 | | | **1.2 — Migrate Database to PostgreSQL** | 1. Replace `Microsoft.EntityFrameworkCore.SqlServer` with `Npgsql.EntityFrameworkCore.PostgreSQL` | |
 | | | | 2. Update `DbContext` configuration to use `UseNpgsql()` | |
 | | | | 3. Update connection string format in `appsettings.json` for PostgreSQL | |
@@ -21,6 +18,12 @@
 | | | | 3. Set up CI/CD pipeline (build, test, deploy) | GitHub Actions or Azure DevOps. |
 | | | | 4. Configure environment-specific settings (dev, staging, prod) | Connection strings, Entra IDs, CORS origins. |
 | | | | 5. Set up production CORS origins for Admin portal and Edio domains | Currently hardcoded to `localhost:5173`/`5174`. |
+| | | **1.4 — Split into Separate Repositories** | 1. Create separate GitLab repository for `guideops-sdk` (npm package) | Currently lives under `src/guideops-sdk` in the monorepo. |
+| | | | 2. Create separate GitLab repository for `GuideOps.Api` (.NET backend) | Currently lives under `src/GuideOps.Api` in the monorepo. |
+| | | | 3. Create separate GitLab repository for `GuideOps.Admin` (React frontend) | Currently lives under `src/GuideOps.Admin` in the monorepo. |
+| | | | 4. Update SDK package references — consume SDK via registry (not `file:` link) | Depends on SDK being published to a package registry (Story 11.2). |
+| | | | 5. Set up independent CI/CD pipelines per repository in GitLab | Build, test, deploy per component. |
+| | | | 6. Document cross-repo dependency versions and release workflow | SDK version pinning, coordinated releases. |
 | 2. Project-Level Multi-Application Support | GuideOps must support managing guides and handbooks across multiple applications from a single platform. All content, assignments, and tracking are scoped to a project. | **2.1 — Project Entity & Data Model** | 1. Create `Project` entity (`Id`, `Name`, `Slug`, `Description`, `IsActive`, `CreatedAt`, `UpdatedAt`) | Slug is a URL-safe identifier (e.g., `edio`, `admin-portal`). |
 | | | | 2. Add `ProjectId` foreign key to `Guide` model | All guides are scoped to a project. |
 | | | | 3. Add `ProjectId` foreign key to `Handbook` model | All handbooks are scoped to a project. |
@@ -100,15 +103,13 @@
 | | | | 2. Handbook editor: add date pickers for activation and removal dates | |
 | | | | 3. Guide/Handbook list: show scheduling status (Scheduled, Active, Expired) | |
 | | | | 4. Calendar or timeline view of scheduled guides | Nice-to-have. |
-| 9. Admin Portal Hardening | The POC admin portal needs polish for production use. | **9.1 — Admin Authentication & Authorization** | 1. Enforce Entra ID authentication on all admin routes | POC has `AuthGuard` but needs real app registration. |
-| | | | 2. Role-based access: only users with `Admin` app role can access | |
+| 9. Admin Portal Hardening | The POC admin portal needs polish for production use. | **9.1 — Admin Authentication** | 1. Enforce Entra ID authentication on all admin routes using the shared app registration (Story 1.1) | POC has `AuthGuard` but needs the production app registration. |
 | | | **9.2 — Admin UX Polish** | 1. Add confirmation dialogs for destructive actions (delete guide, delete handbook) | |
 | | | | 2. Add form validation on all editor pages (required fields, max lengths) | Match DB constraints. |
 | | | | 3. Add error handling / toast notifications for mutation failures | |
 | | | | 4. Add loading states and empty states across all pages | |
 | | | | 5. Dashboard: summary stats (active guides, pending acknowledgments, upcoming scheduled) | Nice-to-have. |
-| 10. API Hardening | Production-grade the GraphQL API with auth enforcement, validation, and observability. | **10.1 — API Authentication & Authorization** | 1. Enforce JWT bearer auth on all GraphQL queries/mutations | POC registers auth but doesn't enforce `[Authorize]`. |
-| | | | 2. Add authorization policies: read-only for SDK, read-write for admin | Map to Entra ID scopes. |
+| 10. API Hardening | Production-grade the GraphQL API with auth enforcement, validation, and observability. | **10.1 — API Authentication** | 1. Enforce JWT bearer auth on all GraphQL queries/mutations | Uses the shared Entra ID app registration (Story 1.1). POC registers auth but doesn't enforce `[Authorize]`. |
 | | | **10.2 — API Reliability & Observability** | 1. Add input validation on all mutations (max length, required fields, enum validation) | |
 | | | | 2. Add structured logging (Serilog or similar) | |
 | | | | 3. Add health check endpoint | Nice-to-have. |
