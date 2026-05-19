@@ -1,0 +1,15 @@
+:root {
+    width: 100%;
+}
+
+
+
+body {
+    max-width: none;
+    width: 100%;
+}
+
+.markdown-body {
+    max-width: none;
+    width:100%;
+}
